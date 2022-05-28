@@ -63,10 +63,13 @@ public class CosyncStorageSwift:NSObject, ObservableObject,  URLSessionTaskDeleg
    
     private var privateRealm:Realm?
     private var publicRealm:Realm?
+    
     private var app : App! = nil
     private var currentUserId: String?
     
-     
+    private var smallImageCutSize:Int = 300
+    private var mediumImageCutSize: Int = 600
+    private var largeImageCutSize: Int = 900
     
     @available(iOS 15.0, *)
     public func configure(app: App, privateRealm:Realm, publicRealm:Realm) {
@@ -77,8 +80,6 @@ public class CosyncStorageSwift:NSObject, ObservableObject,  URLSessionTaskDeleg
         
         if  let user = self.app.currentUser {
             currentUserId = user.id
-            
-            
             self.privateRealm = privateRealm
             self.publicRealm = publicRealm
             
@@ -88,8 +89,21 @@ public class CosyncStorageSwift:NSObject, ObservableObject,  URLSessionTaskDeleg
         else{
             print("invalid realm configuration")
         }
-        
        
+    }
+    
+    @available(iOS 15.0, *)
+    public func resetThumbnailCut() {
+        self.smallImageCutSize = 300
+        self.mediumImageCutSize = 600
+        self.largeImageCutSize = 900
+    }
+    
+    @available(iOS 15.0, *)
+    public func configureThumbnailCut(smallSize: Int, mediumSize: Int, largeSize: Int) {
+        self.smallImageCutSize = smallSize
+        self.mediumImageCutSize = mediumSize
+        self.largeImageCutSize = largeSize
     }
     
     
@@ -316,9 +330,9 @@ public class CosyncStorageSwift:NSObject, ObservableObject,  URLSessionTaskDeleg
                 let writeUrlSmall = assetUpload.writeUrlSmall,
                 let writeUrlMedium = assetUpload.writeUrlMedium,
                 let writeUrlLarge = assetUpload.writeUrlLarge,
-                let imageSmall = image.imageCut(cutSize: 300),
-                let imageMedium = image.imageCut(cutSize: 600),
-                let imageLarge =  image.imageCut(cutSize: 900){
+                let imageSmall = image.imageCut(cutSize: CGFloat(self.smallImageCutSize)),
+                let imageMedium = image.imageCut(cutSize: CGFloat(self.mediumImageCutSize)),
+                let imageLarge =  image.imageCut(cutSize: CGFloat(self.largeImageCutSize)){
              
                 self.uploadTask = "original-"+fileName
                 
