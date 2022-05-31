@@ -327,7 +327,7 @@ public class CosyncStorageSwift:NSObject, ObservableObject,  URLSessionTaskDeleg
         DispatchQueue.main.async {
             let noCuts = assetUpload.noCuts
             if noCuts != nil && noCuts == true {
-               let writeUrl = assetUpload.writeUrl
+                let writeUrl = assetUpload.writeUrl
                 
                 Task{
                     do {
@@ -645,7 +645,7 @@ public class CosyncStorageSwift:NSObject, ObservableObject,  URLSessionTaskDeleg
     
     
     
-    public func createAssetUpload(assetIdList: [String], expiredHours:Double, path:String, noCuts:Bool?, smallCutSize:Int?, mediumCutSize:Int?, largeCutSize:Int?){
+    public func createAssetUpload(assetIdList: [String], expiredHours:Double, path:String, noCuts:Bool = false, smallCutSize:Int = 0, mediumCutSize:Int = 0, largeCutSize:Int = 0){
          
         if let currentUserId = self.currentUserId,
            let sessionId = self.sessionId {
@@ -705,10 +705,10 @@ public class CosyncStorageSwift:NSObject, ObservableObject,  URLSessionTaskDeleg
                             cosyncAssetUpload.color = color
                             cosyncAssetUpload.xRes = xRes
                             cosyncAssetUpload.yRes = yRes
-                            cosyncAssetUpload.noCuts = noCuts ?? false
-                            cosyncAssetUpload.smallCutSize = smallCutSize ?? self.smallImageCutSize
-                            cosyncAssetUpload.mediumCutSize = smallCutSize ?? self.mediumImageCutSize
-                            cosyncAssetUpload.largeCutSize = smallCutSize ?? self.largeImageCutSize
+                            cosyncAssetUpload.noCuts = noCuts
+                            cosyncAssetUpload.smallCutSize = smallCutSize > 0 ? smallCutSize : self.smallImageCutSize
+                            cosyncAssetUpload.mediumCutSize = mediumCutSize > 0 ? mediumCutSize : self.mediumImageCutSize
+                            cosyncAssetUpload.largeCutSize = largeCutSize > 0 ? largeCutSize : self.largeImageCutSize
                             
                             self.uploadAssetId = cosyncAssetUpload._id
                             
