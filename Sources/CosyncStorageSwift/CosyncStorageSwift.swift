@@ -50,6 +50,7 @@ public class CosyncStorageSwift:NSObject, ObservableObject,  URLSessionTaskDeleg
     @Published public var uploadAmount = 0.0
     @Published public var uploadAssetId = ObjectId()
     
+    private var cosyncAssetUpload: CosyncAssetUpload?
     private var uploadToken: NotificationToken! = nil
     private var publicAssetToken: NotificationToken! = nil
     private var privateAssetToken: NotificationToken! = nil
@@ -274,6 +275,8 @@ public class CosyncStorageSwift:NSObject, ObservableObject,  URLSessionTaskDeleg
         if assetUpload.status != "initialized"{
             return
         }
+        
+        cosyncAssetUpload = assetUpload
         
         DispatchQueue.main.async {
             self.uploadStart = true
@@ -621,28 +624,33 @@ public class CosyncStorageSwift:NSObject, ObservableObject,  URLSessionTaskDeleg
        
             
         var value: Float = 0.0
-        switch self.uploadPhase {
-        // Image upload
-        case .uploadImageUrl:
-            value = progress * 0.50
-        case .uploadImageUrlSmall:
-            value = 0.50 + (progress * 0.10)
-        case .uploadImageUrlMedium:
-            value = 0.60 + (progress * 0.10)
-        case .uploadImageUrlLarge:
-            value = 0.65 + (progress * 0.30)
-            
-        // Video upload
-        case .uploadVideoUrl:
-            value = progress * 0.70
-        case .uploadVideoUrlPreview:
-            value = 0.70 + (progress * 0.05)
-        case .uploadVideoUrlSmall:
-            value = 0.75 + (progress * 0.05)
-        case .uploadVideoUrlMedium:
-            value = 0.80 + (progress * 0.05)
-        case .uploadVideoUrlLarge:
-            value = 0.85 + (progress * 0.10)
+        if( cosyncAssetUpload?.noCuts == false){
+            switch self.uploadPhase {
+            // Image upload
+            case .uploadImageUrl:
+                value = progress * 0.50
+            case .uploadImageUrlSmall:
+                value = 0.50 + (progress * 0.10)
+            case .uploadImageUrlMedium:
+                value = 0.60 + (progress * 0.10)
+            case .uploadImageUrlLarge:
+                value = 0.65 + (progress * 0.30)
+                
+            // Video upload
+            case .uploadVideoUrl:
+                value = progress * 0.70
+            case .uploadVideoUrlPreview:
+                value = 0.70 + (progress * 0.05)
+            case .uploadVideoUrlSmall:
+                value = 0.75 + (progress * 0.05)
+            case .uploadVideoUrlMedium:
+                value = 0.80 + (progress * 0.05)
+            case .uploadVideoUrlLarge:
+                value = 0.85 + (progress * 0.10)
+            }
+        }
+        else {
+            value = progress
         }
         
         DispatchQueue.main.async {
