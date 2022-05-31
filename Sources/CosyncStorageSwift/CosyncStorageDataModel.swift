@@ -36,6 +36,7 @@ public class CosyncAssetUpload: Object {
     @Persisted var writeUrlMedium: String?
     @Persisted var writeUrlLarge: String?
     @Persisted var writeUrlVideoPreview: String?
+    @Persisted var url: String?
     @Persisted var urlSmall: String?
     @Persisted var urlMedium: String?
     @Persisted var urlLarge: String?

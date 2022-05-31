@@ -332,7 +332,12 @@ public class CosyncStorageSwift:NSObject, ObservableObject,  URLSessionTaskDeleg
                 Task{
                     do {
                         try await self.uploadImageToURL(image: image, fileName: "original-"+fileName, writeUrl: writeUrl!, contentType: contentType)
+                        
                         self.uploadSuccess(assetUpload:assetUpload)
+                        
+                        if let url = assetUpload.url {
+                            self.uploadedAssetList.append(url)
+                        }
                     }
                     catch {
                         self.uploadError(assetUpload)
@@ -500,6 +505,8 @@ public class CosyncStorageSwift:NSObject, ObservableObject,  URLSessionTaskDeleg
                         self.uploadTask = "preview-"+fileName
                         self.uploadPhase = .uploadVideoUrlPreview
                         try await self.uploadImageToURL(image: image, fileName: "preview-"+fileName, writeUrl: writeUrlVideoPreview!, contentType: imageContentType)
+                        
+                        self.uploadSuccess(assetUpload:assetUpload)
                     }
                     catch {
                         self.uploadError(assetUpload)
@@ -645,8 +652,8 @@ public class CosyncStorageSwift:NSObject, ObservableObject,  URLSessionTaskDeleg
     
     
     
-    public func createAssetUpload(assetIdList: [String], expiredHours:Double, path:String, noCuts:Bool = false, smallCutSize:Int = 0, mediumCutSize:Int = 0, largeCutSize:Int = 0){
-         
+    public func createAssetUpload(assetIdList: [String], expiredHours:Double, path:String, noCuts:Bool = false, smallCutSize:Int = 0, mediumCutSize:Int = 0, largeCutSize:Int = 0) -> [ObjectId]{
+        var objectIdList:[ObjectId] = []
         if let currentUserId = self.currentUserId,
            let sessionId = self.sessionId {
             
@@ -711,6 +718,7 @@ public class CosyncStorageSwift:NSObject, ObservableObject,  URLSessionTaskDeleg
                             cosyncAssetUpload.largeCutSize = largeCutSize > 0 ? largeCutSize : self.largeImageCutSize
                             
                             self.uploadAssetId = cosyncAssetUpload._id
+                            objectIdList.append(cosyncAssetUpload._id)
                             
                             if let userRealm = self.privateRealm {
                                 try! userRealm.write {
@@ -722,6 +730,7 @@ public class CosyncStorageSwift:NSObject, ObservableObject,  URLSessionTaskDeleg
                 }
             }
         }
+        return objectIdList
     }
     
     
