@@ -621,39 +621,39 @@ public class CosyncStorageSwift:NSObject, ObservableObject,  URLSessionTaskDeleg
     public func urlSession(_ session: URLSession, task: URLSessionTask, didSendBodyData bytesSent: Int64, totalBytesSent: Int64, totalBytesExpectedToSend: Int64) {
         
         let progress = Float(totalBytesSent) / Float(totalBytesExpectedToSend)
-       
-            
-        var value: Float = 0.0
-        if( cosyncAssetUpload?.noCuts == false){
-            switch self.uploadPhase {
-            // Image upload
-            case .uploadImageUrl:
-                value = progress * 0.50
-            case .uploadImageUrlSmall:
-                value = 0.50 + (progress * 0.10)
-            case .uploadImageUrlMedium:
-                value = 0.60 + (progress * 0.10)
-            case .uploadImageUrlLarge:
-                value = 0.65 + (progress * 0.30)
-                
-            // Video upload
-            case .uploadVideoUrl:
-                value = progress * 0.70
-            case .uploadVideoUrlPreview:
-                value = 0.70 + (progress * 0.05)
-            case .uploadVideoUrlSmall:
-                value = 0.75 + (progress * 0.05)
-            case .uploadVideoUrlMedium:
-                value = 0.80 + (progress * 0.05)
-            case .uploadVideoUrlLarge:
-                value = 0.85 + (progress * 0.10)
-            }
-        }
-        else {
-            value = progress
-        }
         
         DispatchQueue.main.async {
+            
+            var value: Float = 0.0
+            if( self.cosyncAssetUpload?.noCuts == false){
+                switch self.uploadPhase {
+                // Image upload
+                case .uploadImageUrl:
+                    value = progress * 0.50
+                case .uploadImageUrlSmall:
+                    value = 0.50 + (progress * 0.10)
+                case .uploadImageUrlMedium:
+                    value = 0.60 + (progress * 0.10)
+                case .uploadImageUrlLarge:
+                    value = 0.65 + (progress * 0.30)
+                    
+                // Video upload
+                case .uploadVideoUrl:
+                    value = progress * 0.70
+                case .uploadVideoUrlPreview:
+                    value = 0.70 + (progress * 0.05)
+                case .uploadVideoUrlSmall:
+                    value = 0.75 + (progress * 0.05)
+                case .uploadVideoUrlMedium:
+                    value = 0.80 + (progress * 0.05)
+                case .uploadVideoUrlLarge:
+                    value = 0.85 + (progress * 0.10)
+                }
+            }
+            else {
+                value = progress
+            }
+      
             self.uploadAmount = Double(value) * 100.0
         }
     }
