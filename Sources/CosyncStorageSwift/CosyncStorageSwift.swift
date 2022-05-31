@@ -93,14 +93,14 @@ public class CosyncStorageSwift:NSObject, ObservableObject,  URLSessionTaskDeleg
     }
     
     @available(iOS 15.0, *)
-    public func resetThumbnailCut() {
+    public func resetThumbnailCutSize() {
         self.smallImageCutSize = 300
         self.mediumImageCutSize = 600
         self.largeImageCutSize = 900
     }
     
     @available(iOS 15.0, *)
-    public func configureThumbnailCut(smallSize: Int, mediumSize: Int, largeSize: Int) {
+    public func configureThumbnailCutSize(smallSize: Int, mediumSize: Int, largeSize: Int) {
         self.smallImageCutSize = smallSize
         self.mediumImageCutSize = mediumSize
         self.largeImageCutSize = largeSize
@@ -325,14 +325,44 @@ public class CosyncStorageSwift:NSObject, ObservableObject,  URLSessionTaskDeleg
     func uploadImage(assetUpload:CosyncAssetUpload, image:UIImage, fileName:String, contentType:String){
         
         DispatchQueue.main.async {
-            
-            if  let writeUrl = assetUpload.writeUrl,
+            let noCuts = assetUpload.noCuts
+            if noCuts != nil && noCuts == true {
+               let writeUrl = assetUpload.writeUrl
+                
+                Task{
+                    do {
+                        try await self.uploadImageToURL(image: image, fileName: "original-"+fileName, writeUrl: writeUrl!, contentType: contentType)
+                        self.uploadSuccess(assetUpload:assetUpload)
+                    }
+                    catch {
+                        self.uploadError(assetUpload)
+                        print("upload error")
+                    }
+                }
+            }
+            else if let writeUrl = assetUpload.writeUrl,
                 let writeUrlSmall = assetUpload.writeUrlSmall,
                 let writeUrlMedium = assetUpload.writeUrlMedium,
-                let writeUrlLarge = assetUpload.writeUrlLarge,
-                let imageSmall = image.imageCut(cutSize: CGFloat(self.smallImageCutSize)),
-                let imageMedium = image.imageCut(cutSize: CGFloat(self.mediumImageCutSize)),
-                let imageLarge =  image.imageCut(cutSize: CGFloat(self.largeImageCutSize)){
+                let writeUrlLarge = assetUpload.writeUrlLarge {
+                
+                var smallCutSize = self.smallImageCutSize
+                if (assetUpload.smallCutSize != nil && assetUpload.smallCutSize! > 0){
+                    smallCutSize = assetUpload.smallCutSize!
+                }
+                
+                var mediumCutSize = self.mediumImageCutSize
+                if (assetUpload.mediumCutSize != nil && assetUpload.mediumCutSize! > 0){
+                    mediumCutSize = assetUpload.mediumCutSize!
+                }
+                
+                var largeCutSize = self.largeImageCutSize
+                if (assetUpload.largeCutSize != nil && assetUpload.largeCutSize! > 0){
+                    largeCutSize = assetUpload.largeCutSize!
+                }
+            
+                let imageSmall = image.imageCut(cutSize: CGFloat(smallCutSize))
+                let imageMedium = image.imageCut(cutSize: CGFloat(mediumCutSize))
+                let imageLarge =  image.imageCut(cutSize: CGFloat(largeCutSize))
              
                 self.uploadTask = "original-"+fileName
                 
@@ -345,7 +375,7 @@ public class CosyncStorageSwift:NSObject, ObservableObject,  URLSessionTaskDeleg
                         
                         self.uploadTask = "small-"+fileName
                         self.uploadPhase = .uploadImageUrlSmall
-                        try await self.uploadImageToURL(image: imageSmall, fileName: "small-"+fileName, writeUrl: writeUrlSmall, contentType: contentType)
+                        try await self.uploadImageToURL(image: imageSmall!, fileName: "small-"+fileName, writeUrl: writeUrlSmall, contentType: contentType)
                         if let urlSmall = assetUpload.urlSmall {
                             self.uploadedAssetList.append(urlSmall)
                         }
@@ -353,7 +383,7 @@ public class CosyncStorageSwift:NSObject, ObservableObject,  URLSessionTaskDeleg
                         
                         self.uploadTask = "medium-"+fileName
                         self.uploadPhase = .uploadImageUrlMedium
-                        try await self.uploadImageToURL(image: imageMedium, fileName: "medium-"+fileName, writeUrl: writeUrlMedium, contentType: contentType)
+                        try await self.uploadImageToURL(image: imageMedium!, fileName: "medium-"+fileName, writeUrl: writeUrlMedium, contentType: contentType)
                         if let urlMedium = assetUpload.urlMedium {
                             self.uploadedAssetList.append(urlMedium)
                         }
@@ -361,7 +391,7 @@ public class CosyncStorageSwift:NSObject, ObservableObject,  URLSessionTaskDeleg
                         
                         self.uploadTask = "large-"+fileName
                         self.uploadPhase = .uploadImageUrlLarge
-                        try await self.uploadImageToURL(image: imageLarge, fileName: "large-"+fileName, writeUrl: writeUrlLarge, contentType: contentType)
+                        try await self.uploadImageToURL(image: imageLarge!, fileName: "large-"+fileName, writeUrl: writeUrlLarge, contentType: contentType)
                         if let urlLarge = assetUpload.urlLarge {
                             self.uploadedAssetList.append(urlLarge)
                         }
@@ -453,14 +483,55 @@ public class CosyncStorageSwift:NSObject, ObservableObject,  URLSessionTaskDeleg
         
         DispatchQueue.main.async {
             
-            if  let writeUrl = assetUpload.writeUrl,
+            let noCuts = assetUpload.noCuts
+            
+            if noCuts != nil && noCuts == true {
+               let writeUrl = assetUpload.writeUrl
+                let writeUrlVideoPreview = assetUpload.writeUrlVideoPreview
+                
+                Task{
+                    do {
+                        self.uploadAmount = 0.0
+                        self.uploadPhase = .uploadVideoUrl
+                        try await self.uploadVideoToURL(videoUrl: videoUrl, fileName: fileName, writeUrl: writeUrl!, contentType: contentType)
+                        
+                        
+                        let imageContentType = "image/png"
+                        self.uploadTask = "preview-"+fileName
+                        self.uploadPhase = .uploadVideoUrlPreview
+                        try await self.uploadImageToURL(image: image, fileName: "preview-"+fileName, writeUrl: writeUrlVideoPreview!, contentType: imageContentType)
+                    }
+                    catch {
+                        self.uploadError(assetUpload)
+                        print("upload error")
+                    }
+                }
+            }
+            
+            else if let writeUrl = assetUpload.writeUrl,
                 let writeUrlVideoPreview = assetUpload.writeUrlVideoPreview,
                 let writeUrlSmall = assetUpload.writeUrlSmall,
                 let writeUrlMedium = assetUpload.writeUrlMedium,
-                let writeUrlLarge = assetUpload.writeUrlLarge,
-                let imageSmall = image.imageCut(cutSize: 300),
-                let imageMedium = image.imageCut(cutSize: 600),
-                let imageLarge =  image.imageCut(cutSize: 900){
+                let writeUrlLarge = assetUpload.writeUrlLarge {
+                
+                var smallCutSize = self.smallImageCutSize
+                if (assetUpload.smallCutSize != nil && assetUpload.smallCutSize! > 0){
+                    smallCutSize = assetUpload.smallCutSize!
+                }
+                
+                var mediumCutSize = self.mediumImageCutSize
+                if (assetUpload.mediumCutSize != nil && assetUpload.mediumCutSize! > 0){
+                    mediumCutSize = assetUpload.mediumCutSize!
+                }
+                
+                var largeCutSize = self.largeImageCutSize
+                if (assetUpload.largeCutSize != nil && assetUpload.largeCutSize! > 0){
+                    largeCutSize = assetUpload.largeCutSize!
+                }
+                
+                let imageSmall = image.imageCut(cutSize: CGFloat(smallCutSize))
+                let imageMedium = image.imageCut(cutSize: CGFloat(mediumCutSize))
+                let imageLarge =  image.imageCut(cutSize: CGFloat(largeCutSize))
              
                 self.uploadTask = "video-"+fileName
                 
@@ -478,7 +549,7 @@ public class CosyncStorageSwift:NSObject, ObservableObject,  URLSessionTaskDeleg
                         
                         self.uploadPhase = .uploadVideoUrlSmall
                         self.uploadTask = "small-"+fileName
-                        try await self.uploadImageToURL(image: imageSmall, fileName: "small-"+fileName, writeUrl: writeUrlSmall, contentType: imageContentType)
+                        try await self.uploadImageToURL(image: imageSmall!, fileName: "small-"+fileName, writeUrl: writeUrlSmall, contentType: imageContentType)
                         if let urlSmall = assetUpload.urlSmall {
                             self.uploadedAssetList.append(urlSmall)
                         }
@@ -486,7 +557,7 @@ public class CosyncStorageSwift:NSObject, ObservableObject,  URLSessionTaskDeleg
                          
                         self.uploadPhase = .uploadVideoUrlMedium
                         self.uploadTask = "medium-"+fileName
-                        try await self.uploadImageToURL(image: imageMedium, fileName: "medium-"+fileName, writeUrl: writeUrlMedium, contentType: imageContentType)
+                        try await self.uploadImageToURL(image: imageMedium!, fileName: "medium-"+fileName, writeUrl: writeUrlMedium, contentType: imageContentType)
                         if let urlMedium = assetUpload.urlMedium {
                             self.uploadedAssetList.append(urlMedium)
                         }
@@ -494,7 +565,7 @@ public class CosyncStorageSwift:NSObject, ObservableObject,  URLSessionTaskDeleg
                         
                         self.uploadPhase = .uploadVideoUrlLarge
                         self.uploadTask = "large-"+fileName
-                        try await self.uploadImageToURL(image: imageLarge, fileName: "large-"+fileName, writeUrl: writeUrlLarge, contentType: imageContentType)
+                        try await self.uploadImageToURL(image: imageLarge!, fileName: "large-"+fileName, writeUrl: writeUrlLarge, contentType: imageContentType)
                         if let urlLarge = assetUpload.urlLarge {
                             self.uploadedAssetList.append(urlLarge)
                         }
@@ -574,7 +645,7 @@ public class CosyncStorageSwift:NSObject, ObservableObject,  URLSessionTaskDeleg
     
     
     
-    public func createAssetUpload(assetIdList: [String], expiredHours:Double, path:String){
+    public func createAssetUpload(assetIdList: [String], expiredHours:Double, path:String, noCuts:Bool?, smallCutSize:Int?, mediumCutSize:Int?, largeCutSize:Int?){
          
         if let currentUserId = self.currentUserId,
            let sessionId = self.sessionId {
@@ -634,6 +705,10 @@ public class CosyncStorageSwift:NSObject, ObservableObject,  URLSessionTaskDeleg
                             cosyncAssetUpload.color = color
                             cosyncAssetUpload.xRes = xRes
                             cosyncAssetUpload.yRes = yRes
+                            cosyncAssetUpload.noCuts = noCuts ?? false
+                            cosyncAssetUpload.smallCutSize = smallCutSize ?? self.smallImageCutSize
+                            cosyncAssetUpload.mediumCutSize = smallCutSize ?? self.mediumImageCutSize
+                            cosyncAssetUpload.largeCutSize = smallCutSize ?? self.largeImageCutSize
                             
                             self.uploadAssetId = cosyncAssetUpload._id
                             

@@ -26,6 +26,10 @@ public class CosyncAssetUpload: Object {
     @Persisted var color: String = "#000000"
     @Persisted var xRes: Int = 0
     @Persisted var yRes: Int = 0
+    @Persisted var smallCutSize: Int?
+    @Persisted var mediumCutSize: Int?
+    @Persisted var largeCutSize: Int?
+    @Persisted var noCuts: Bool?
     @Persisted var caption: String = ""
     @Persisted var writeUrl: String?
     @Persisted var writeUrlSmall: String?
