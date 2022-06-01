@@ -30,6 +30,7 @@ public class CosyncAssetUpload: Object {
     @Persisted var mediumCutSize: Int?
     @Persisted var largeCutSize: Int?
     @Persisted var noCuts: Bool?
+    @Persisted var originalSize: Int?
     @Persisted var caption: String = ""
     @Persisted var writeUrl: String?
     @Persisted var writeUrlSmall: String?

@@ -334,7 +334,15 @@ public class CosyncStorageSwift:NSObject, ObservableObject,  URLSessionTaskDeleg
                 
                 Task{
                     do {
-                        try await self.uploadImageToURL(image: image, fileName: "original-"+fileName, writeUrl: writeUrl!, contentType: contentType)
+                        if let originalSize = assetUpload.originalSize,
+                           originalSize > 0 {
+                            
+                            let imageOriginalCut = image.imageCut(cutSize: CGFloat(originalSize))
+                            try await self.uploadImageToURL(image: imageOriginalCut!, fileName: "original-"+fileName, writeUrl: writeUrl!, contentType: contentType)
+                        }
+                        else {
+                            try await self.uploadImageToURL(image: image, fileName: "original-"+fileName, writeUrl: writeUrl!, contentType: contentType)
+                        }
                         
                         self.uploadSuccess(assetUpload:assetUpload)
                         
@@ -660,7 +668,7 @@ public class CosyncStorageSwift:NSObject, ObservableObject,  URLSessionTaskDeleg
     
     
     
-    public func createAssetUpload(assetIdList: [String], expiredHours:Double, path:String, noCuts:Bool = false, smallCutSize:Int = 0, mediumCutSize:Int = 0, largeCutSize:Int = 0) -> [ObjectId]{
+    public func createAssetUpload(assetIdList: [String], expiredHours:Double, path:String, noCuts:Bool = false, originalSize:Int = 0, smallCutSize:Int = 0, mediumCutSize:Int = 0, largeCutSize:Int = 0) -> [ObjectId]{
         var objectIdList:[ObjectId] = []
         if let currentUserId = self.currentUserId,
            let sessionId = self.sessionId {
@@ -721,6 +729,7 @@ public class CosyncStorageSwift:NSObject, ObservableObject,  URLSessionTaskDeleg
                             cosyncAssetUpload.xRes = xRes
                             cosyncAssetUpload.yRes = yRes
                             cosyncAssetUpload.noCuts = noCuts
+                            cosyncAssetUpload.originalSize = originalSize
                             cosyncAssetUpload.smallCutSize = smallCutSize > 0 ? smallCutSize : self.smallImageCutSize
                             cosyncAssetUpload.mediumCutSize = mediumCutSize > 0 ? mediumCutSize : self.mediumImageCutSize
                             cosyncAssetUpload.largeCutSize = largeCutSize > 0 ? largeCutSize : self.largeImageCutSize
