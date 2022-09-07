@@ -70,7 +70,7 @@ public struct AssetPicker: UIViewControllerRepresentable {
                 
                 for asset in results {
                     if let assetId = asset.assetIdentifier {
-                        print("picked  assetId =", assetId)
+                       // print("picked  assetId =", assetId)
                         assetIdList.append(assetId)
                     }
                      
@@ -93,8 +93,6 @@ public struct AssetPicker: UIViewControllerRepresentable {
                 
                 for asset in results {
                     if let assetId = asset.assetIdentifier {
-
-                        print("picked  assetId =", assetId)
                         assetIdList.append(assetId)
                     }
 

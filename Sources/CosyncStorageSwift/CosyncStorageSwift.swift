@@ -41,8 +41,7 @@ public class CosyncStorageSwift:NSObject, ObservableObject,  URLSessionTaskDeleg
     
     public static let shared = CosyncStorageSwift()
     @Published public var uploadedAsset = CosyncAsset()
-    @Published public var assetListPrivate = [CosyncAsset]()
-    @Published public var assetListPublic = [CosyncAsset]()
+    @Published public var assetLists = [CosyncAsset]()
     @Published public var allAssets = [CosyncAsset]()
     @Published public var uploadedAssetList:[String] = []
     @Published public var uploadStart = false
@@ -52,8 +51,8 @@ public class CosyncStorageSwift:NSObject, ObservableObject,  URLSessionTaskDeleg
     
     private var cosyncAssetUpload: CosyncAssetUpload?
     private var uploadToken: NotificationToken! = nil
-    private var publicAssetToken: NotificationToken! = nil
-    private var privateAssetToken: NotificationToken! = nil
+    private var assetToken: NotificationToken! = nil
+    
     
     private var uploadPhase: UploadPhase = .uploadImageUrl
     
@@ -61,9 +60,7 @@ public class CosyncStorageSwift:NSObject, ObservableObject,  URLSessionTaskDeleg
         return UIDevice.current.identifierForVendor?.uuidString
     }
     
-   
-    private var privateRealm:Realm?
-    private var publicRealm:Realm?
+    private var realm:Realm?
     
     private var app : App! = nil
     private var currentUserId: String?
@@ -73,16 +70,14 @@ public class CosyncStorageSwift:NSObject, ObservableObject,  URLSessionTaskDeleg
     private var largeImageCutSize: Int = 900
     
     @available(iOS 15.0, *)
-    public func configure(app: App, privateRealm:Realm, publicRealm:Realm) {
+    public func configure(app: App, realm:Realm) {
         
         self.app = app
-        self.privateRealm = privateRealm
-        self.publicRealm = publicRealm
+        
+        self.realm = realm
         
         if  let user = self.app.currentUser {
             currentUserId = user.id
-            self.privateRealm = privateRealm
-            self.publicRealm = publicRealm
             
             setUpAssetListener()
             setUpUploadListener()
@@ -111,12 +106,12 @@ public class CosyncStorageSwift:NSObject, ObservableObject,  URLSessionTaskDeleg
     @available(iOS 15.0, *)
     private func setUpUploadListener(){
         
-        if let realm = self.privateRealm,
-           let uid = currentUserId,
+        if let realm = self.realm,
+           let userId = currentUserId,
            let sessionId = sessionId {
             
             let results = realm.objects(CosyncAssetUpload.self)
-                .filter("uid == '\(uid)' && sessionId=='\(sessionId)'")
+                .filter("userId == '\(userId)' && sessionId=='\(sessionId)'")
             
             self.uploadToken = results.observe { [self] (changes: RealmCollectionChange) in
         
@@ -145,17 +140,17 @@ public class CosyncStorageSwift:NSObject, ObservableObject,  URLSessionTaskDeleg
     
     private func setUpAssetListener(){
         
-        if let publicRealm = self.publicRealm,
-           let uid = self.currentUserId {
+        if let realm = self.realm,
+           let userId = self.currentUserId {
             
-            let publicAsset = publicRealm.objects(CosyncAsset.self).filter("uid == '\(uid)'")
-            for asset in publicAsset {
-                self.assetListPublic.append(asset)
+            let assetList = realm.objects(CosyncAsset.self).filter("userId == '\(userId)'")
+            for asset in assetList {
+                self.assetLists.append(asset)
                 self.allAssets.append(asset)
             }
             
             
-            self.publicAssetToken = publicAsset.observe { (changes: RealmCollectionChange) in
+            self.assetToken = assetList.observe { (changes: RealmCollectionChange) in
             
                 switch changes {
                 case .initial: break
@@ -165,7 +160,7 @@ public class CosyncStorageSwift:NSObject, ObservableObject,  URLSessionTaskDeleg
                     if(!insertions.isEmpty){
                         for index in insertions {
                             let item = results[index]
-                            self.assetListPublic.append(item)
+                            self.assetLists.append(item)
                             self.allAssets.append(item)
                             self.uploadedAsset = item
                         }
@@ -174,7 +169,7 @@ public class CosyncStorageSwift:NSObject, ObservableObject,  URLSessionTaskDeleg
                     if(!modifications.isEmpty){
                         for index in modifications {
                             let asset = results[index]
-                            self.assetListPublic = self.assetListPublic.map { item in
+                            self.assetLists = self.assetLists.map { item in
                                 item._id == asset._id ? asset : item
                             }
                             self.allAssets = self.allAssets.map { item in
@@ -185,7 +180,7 @@ public class CosyncStorageSwift:NSObject, ObservableObject,  URLSessionTaskDeleg
                     
                     if(!deletions.isEmpty){
                         for index in deletions {
-                            self.assetListPublic = self.assetListPublic.filter{$0._id != self.assetListPublic[index]._id}
+                            self.assetLists = self.assetLists.filter{$0._id != self.assetLists[index]._id}
                             
                             self.allAssets = self.allAssets.filter{$0._id != self.allAssets[index]._id}
                             
@@ -205,66 +200,6 @@ public class CosyncStorageSwift:NSObject, ObservableObject,  URLSessionTaskDeleg
         }
         
         
-        if let userRealm = self.privateRealm,
-           let uid = self.currentUserId {
-            
-            let privateAsset = userRealm.objects(CosyncAsset.self).filter("uid == '\(uid)'")
-            
-            for asset in privateAsset {
-                self.assetListPrivate.append(asset)
-                self.allAssets.append(asset)
-            }
-            
-            self.privateAssetToken = privateAsset.observe { (changes: RealmCollectionChange) in
-            
-                switch changes {
-                case .initial: break
-                    
-                    
-                case .update(let results, let deletions, let insertions, let modifications):
-                
-                    if(!insertions.isEmpty){
-                        for index in insertions {
-                            let item = results[index]
-                            self.assetListPrivate.append(item)
-                            self.allAssets.append(item)
-                            self.uploadedAsset = item
-                        }
-                    }
-                    
-                    if(!modifications.isEmpty){
-                        
-                        for index in modifications {
-                            let asset = results[index]
-                            self.assetListPrivate = self.assetListPrivate.map { item in
-                                item._id == asset._id ? asset : item
-                            }
-                            
-                            self.allAssets = self.allAssets.map { item in
-                                item._id == asset._id ? asset : item
-                            }
-                            
-                            
-                        }
-                    }
-                    
-                    if(!deletions.isEmpty){
-                        for index in deletions {
-                            self.assetListPrivate = self.assetListPrivate.filter{$0._id != self.assetListPrivate[index]._id}
-                            
-                            self.allAssets = self.allAssets.filter{$0._id != self.allAssets[index]._id}
-                        }
-                    }
-                    
-                    
-                case .error(let error):
-                    // An error occurred while opening the Realm file on the background worker thread
-                    print("\(error)")
-                }
-                    
-            }
-                    
-        }
     }
     
     
@@ -604,7 +539,7 @@ public class CosyncStorageSwift:NSObject, ObservableObject,  URLSessionTaskDeleg
     func uploadError(_ assetUpload: CosyncAssetUpload) -> Void {
         uploadStart = false
         DispatchQueue.main.async {
-            if let userRealm = self.privateRealm {
+            if let userRealm = self.realm {
                 try! userRealm.write {
                     assetUpload.status = "error"
                 }
@@ -616,7 +551,7 @@ public class CosyncStorageSwift:NSObject, ObservableObject,  URLSessionTaskDeleg
     func uploadSuccess( assetUpload: CosyncAssetUpload) -> Void {
         uploadStart = false
         DispatchQueue.main.async {
-            if let userRealm = self.privateRealm {
+            if let userRealm = self.realm {
                 try! userRealm.write {
                     assetUpload.status = "uploaded"
                 }
@@ -716,11 +651,9 @@ public class CosyncStorageSwift:NSObject, ObservableObject,  URLSessionTaskDeleg
                             let cosyncAssetUpload = CosyncAssetUpload()
                             cosyncAssetUpload.expirationHours = expiredHours
                             cosyncAssetUpload._id = ObjectId.generate()
-                            cosyncAssetUpload._partition = "user_id=\(currentUserId)"
-                            cosyncAssetUpload.uid = currentUserId
+                            cosyncAssetUpload.userId = currentUserId
                             cosyncAssetUpload.sessionId = sessionId
                             cosyncAssetUpload.extra = phAsset.localIdentifier
-                            cosyncAssetUpload.assetPartition = "public"
                             cosyncAssetUpload.filePath = path + "/" + fileName
                             cosyncAssetUpload.contentType = contentType
                             cosyncAssetUpload.size = fileSize
@@ -737,7 +670,7 @@ public class CosyncStorageSwift:NSObject, ObservableObject,  URLSessionTaskDeleg
                             self.uploadAssetId = cosyncAssetUpload._id
                             objectIdList.append(cosyncAssetUpload._id)
                             
-                            if let userRealm = self.privateRealm {
+                            if let userRealm = self.realm {
                                 try! userRealm.write {
                                     userRealm.add(cosyncAssetUpload)
                                 }

@@ -12,11 +12,9 @@ import RealmSwift
 public class CosyncAssetUpload: Object {
     
     @Persisted(primaryKey: true) var _id: ObjectId
-    @Persisted var _partition: String
-    @Persisted(indexed: true) var uid: String
+    @Persisted(indexed: true) var userId: String
     @Persisted var sessionId: String
     @Persisted var extra: String = ""
-    @Persisted var assetPartition: String
     @Persisted var filePath: String = ""
     @Persisted var path: String = ""
     @Persisted var expirationHours: Double = 24.0
@@ -51,8 +49,7 @@ public class CosyncAssetUpload: Object {
 public class CosyncAsset: Object {
     
     @Persisted(primaryKey: true) public var _id: ObjectId
-    @Persisted public var _partition: String
-    @Persisted(indexed: true) public var uid: String = "" 
+    @Persisted(indexed: true) public var userId: String = ""
     @Persisted(indexed: true) public var sessionId: String
     @Persisted public var path: String = ""
     @Persisted public var expirationHours: Double = 24.0
@@ -77,9 +74,7 @@ public class CosyncAsset: Object {
 
 public struct AssetModel: Codable {
     public var id: String
-    public var _partition: String
-    public var uid: String
-    public var assetPartition: String?
+    public var userId: String 
     public var path: String = ""
     public var expirationHours: Double = 0.0
     public var contentType: String = ""
