@@ -11,6 +11,8 @@ import RealmSwift
 
 public class CosyncAssetUpload: Object {
     
+    public override init() {}
+    
     @Persisted(primaryKey: true) var _id: ObjectId
     @Persisted(indexed: true) var userId: String
     @Persisted var sessionId: String
@@ -47,6 +49,8 @@ public class CosyncAssetUpload: Object {
 
 
 public class CosyncAsset: Object {
+    
+    public override init() {}
     
     @Persisted(primaryKey: true) public var _id: ObjectId
     @Persisted(indexed: true) public var userId: String = ""
