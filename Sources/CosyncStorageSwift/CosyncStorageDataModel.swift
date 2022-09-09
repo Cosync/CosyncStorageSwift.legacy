@@ -11,11 +11,9 @@ import RealmSwift
 
 public class CosyncAssetUpload: Object {
     
-    public override init() {}
-    
     @Persisted(primaryKey: true) var _id: ObjectId
-    @Persisted(indexed: true) var userId: String
-    @Persisted var sessionId: String
+    @Persisted(indexed: true) public var userId: String
+    @Persisted public var sessionId: String
     @Persisted var extra: String = ""
     @Persisted var filePath: String = ""
     @Persisted var path: String = ""
@@ -49,29 +47,28 @@ public class CosyncAssetUpload: Object {
 
 
 public class CosyncAsset: Object {
-    
-    public override init() {}
+     
     
     @Persisted(primaryKey: true) public var _id: ObjectId
     @Persisted(indexed: true) public var userId: String = ""
     @Persisted(indexed: true) public var sessionId: String
-    @Persisted public var path: String = ""
-    @Persisted public var expirationHours: Double = 24.0
-    @Persisted public var contentType: String?
-    @Persisted public var size: Int?
-    @Persisted public var duration: Double?
-    @Persisted public var color: String = "#000000"
-    @Persisted public var xRes: Int = 0
-    @Persisted public var yRes: Int = 0
-    @Persisted public var caption: String = ""
-    @Persisted public var url: String?
-    @Persisted public var urlSmall: String?
-    @Persisted public var urlMedium: String?
-    @Persisted public var urlLarge: String?
-    @Persisted public var urlVideoPreview: String?
-    @Persisted public var status: String = "active"
-    @Persisted public var createdAt: Date?
-    @Persisted public var updatedAt: Date?
+    @Persisted var path: String = ""
+    @Persisted var expirationHours: Double = 24.0
+    @Persisted var contentType: String?
+    @Persisted var size: Int?
+    @Persisted var duration: Double?
+    @Persisted var color: String = "#000000"
+    @Persisted var xRes: Int = 0
+    @Persisted var yRes: Int = 0
+    @Persisted var caption: String = ""
+    @Persisted var url: String?
+    @Persisted var urlSmall: String?
+    @Persisted var urlMedium: String?
+    @Persisted var urlLarge: String?
+    @Persisted var urlVideoPreview: String?
+    @Persisted var status: String = "active"
+    @Persisted var createdAt: Date?
+    @Persisted var updatedAt: Date?
 }
 
 
