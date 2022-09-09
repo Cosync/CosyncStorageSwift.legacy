@@ -12,7 +12,7 @@ import RealmSwift
 public class CosyncAssetUpload: Object {
     
     @Persisted(primaryKey: true) var _id: ObjectId
-    @Persisted(indexed: true) public var userId: String
+    @Persisted(indexed: true) public var userId: String = ""
     @Persisted public var sessionId: String
     @Persisted var extra: String = ""
     @Persisted var filePath: String = ""
