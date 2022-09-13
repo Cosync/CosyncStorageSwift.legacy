@@ -57,6 +57,7 @@ public class CosyncAsset: Object {
     @Persisted public var contentType: String?
     @Persisted public var size: Int?
     @Persisted public var duration: Double?
+    @Persisted public var expiration: Date?
     @Persisted public var color: String = "#000000"
     @Persisted public var xRes: Int = 0
     @Persisted public var yRes: Int = 0
@@ -81,6 +82,7 @@ public struct AssetModel: Codable {
     public var contentType: String = ""
     public var size: Int?
     public var duration: Double?
+    public var expiration: Date?
     public var color: String = ""
     public var xRes: Int?
     public var yRes: Int?
