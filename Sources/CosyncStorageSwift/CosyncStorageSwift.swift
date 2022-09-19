@@ -666,6 +666,8 @@ public class CosyncStorageSwift:NSObject, ObservableObject,  URLSessionTaskDeleg
                             cosyncAssetUpload.smallCutSize = smallCutSize > 0 ? smallCutSize : self.smallImageCutSize
                             cosyncAssetUpload.mediumCutSize = mediumCutSize > 0 ? mediumCutSize : self.mediumImageCutSize
                             cosyncAssetUpload.largeCutSize = largeCutSize > 0 ? largeCutSize : self.largeImageCutSize
+                            cosyncAssetUpload.createdAt = Date()
+                            cosyncAssetUpload.updatedAt = Date()
                             
                             self.uploadAssetId = cosyncAssetUpload._id
                             objectIdList.append(cosyncAssetUpload._id)
