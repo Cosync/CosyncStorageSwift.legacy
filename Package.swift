@@ -16,11 +16,14 @@ let package = Package(
         .library(
             name: "AssetPicker",
             targets: ["AssetPicker"]),
+        .library(
+            name: "CameraManager",
+            targets: ["CameraManager"]),
        
     ],
     dependencies: [
         // Dependencies declare other packages that this package depends on.
-        .package(url:"https://github.com/realm/realm-swift.git", from: "10.19.0"),
+        .package(url:"https://github.com/realm/realm-swift.git", from: "10.30.0"),
     ],
     targets: [
         // Targets are the basic building blocks of a package. A target can define a module or a test suite.
@@ -34,6 +37,10 @@ let package = Package(
         .target(
             name: "AssetPicker",
             path: "Sources/Asset"),
+        
+        .target(
+            name: "CameraManager",
+            path: "Sources/CameraPhoto"), 
         
         .testTarget(
             name: "CosyncStorageSwiftTests",
