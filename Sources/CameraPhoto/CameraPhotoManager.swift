@@ -11,12 +11,20 @@ import UIKit
 @available(iOS 15.0, *)
 public struct CameraPhotoManager: UIViewControllerRepresentable {
     
-    var sourceType: UIImagePickerController.SourceType = .camera
-    @Binding var image: Image?
+    
+    @Binding var selectedImage:Image?
     @Binding var isPresented: Bool
     
+    private var sourceType: UIImagePickerController.SourceType = .camera
+    
+    public init(selectedImage: Binding<Image?>, isPresented: Binding<Bool>) {
+        self._selectedImage = selectedImage
+        self._isPresented = isPresented
+        
+    }
+    
     public func makeCoordinator() -> ImagePickerViewCoordinator {
-        return ImagePickerViewCoordinator(image: $image, isPresented: $isPresented)
+        return ImagePickerViewCoordinator(selectedImage: $selectedImage, isPresented: $isPresented)
     }
     
     public func makeUIViewController(context: Context) -> UIImagePickerController {
@@ -35,17 +43,17 @@ public struct CameraPhotoManager: UIViewControllerRepresentable {
 @available(iOS 15.0, *)
 public class ImagePickerViewCoordinator: NSObject, UINavigationControllerDelegate, UIImagePickerControllerDelegate {
     
-    @Binding var image: Image?
+    @Binding var selectedImage: Image?
     @Binding var isPresented: Bool
     
-    public init(image: Binding<Image?>, isPresented: Binding<Bool>) {
-        self._image = image
+    public init(selectedImage: Binding<Image?>, isPresented: Binding<Bool>) {
+        self._selectedImage = selectedImage
         self._isPresented = isPresented
     }
     
     public func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
         if let image = info[UIImagePickerController.InfoKey.originalImage] as? UIImage {
-            self.image = Image(uiImage: image)
+            self.selectedImage = Image(uiImage: image)
         }
         self.isPresented = false
     }
