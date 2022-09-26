@@ -12,12 +12,12 @@ import UIKit
 public struct CameraPhotoManager: UIViewControllerRepresentable {
     
     
-    @Binding var selectedImage:Image?
+    @Binding var selectedImage:UIImage?
     @Binding var isPresented: Bool
     
     private var sourceType: UIImagePickerController.SourceType = .camera
     
-    public init(selectedImage: Binding<Image?>, isPresented: Binding<Bool>) {
+    public init(selectedImage: Binding<UIImage?>, isPresented: Binding<Bool>) {
         self._selectedImage = selectedImage
         self._isPresented = isPresented
         
@@ -43,17 +43,17 @@ public struct CameraPhotoManager: UIViewControllerRepresentable {
 @available(iOS 15.0, *)
 public class ImagePickerViewCoordinator: NSObject, UINavigationControllerDelegate, UIImagePickerControllerDelegate {
     
-    @Binding var selectedImage: Image?
+    @Binding var selectedImage: UIImage?
     @Binding var isPresented: Bool
     
-    public init(selectedImage: Binding<Image?>, isPresented: Binding<Bool>) {
+    public init(selectedImage: Binding<UIImage?>, isPresented: Binding<Bool>) {
         self._selectedImage = selectedImage
         self._isPresented = isPresented
     }
     
     public func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
         if let image = info[UIImagePickerController.InfoKey.originalImage] as? UIImage {
-            self.selectedImage = Image(uiImage: image)
+            self.selectedImage = image
         }
         self.isPresented = false
     }
