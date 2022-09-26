@@ -9,7 +9,7 @@ import SwiftUI
 import UIKit
 
 @available(iOS 15.0, *)
-public struct CameraManager: UIViewControllerRepresentable {
+public struct CameraPhotoManager: UIViewControllerRepresentable {
     
     var sourceType: UIImagePickerController.SourceType = .camera
     @Binding var image: Image?

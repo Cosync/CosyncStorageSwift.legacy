@@ -17,8 +17,8 @@ let package = Package(
             name: "AssetPicker",
             targets: ["AssetPicker"]),
         .library(
-            name: "CameraManager",
-            targets: ["CameraManager"]),
+            name: "CameraPhotoManager",
+            targets: ["CameraPhotoManager"]),
        
     ],
     dependencies: [
@@ -39,7 +39,7 @@ let package = Package(
             path: "Sources/Asset"),
         
         .target(
-            name: "CameraManager",
+            name: "CameraPhotoManager",
             path: "Sources/CameraPhoto"), 
         
         .testTarget(
