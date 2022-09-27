@@ -31,6 +31,9 @@ public struct CameraPhotoManager: UIViewControllerRepresentable {
         let pickerController = UIImagePickerController()
         pickerController.sourceType = sourceType
         pickerController.delegate = context.coordinator
+        pickerController.allowsEditing = true
+        pickerController.cameraCaptureMode = .photo
+        pickerController.showsCameraControls = true
         return pickerController
     }
 
