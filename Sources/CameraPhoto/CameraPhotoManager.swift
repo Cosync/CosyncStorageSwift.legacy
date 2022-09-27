@@ -75,7 +75,7 @@ public class ImagePickerViewCoordinator: NSObject, UINavigationControllerDelegat
         let imageSaver = ImageSaver()
         
         imageSaver.successHandler = {
-            print("Success!")
+           
             let fetchOptions = PHFetchOptions()
             fetchOptions.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: false)]
             fetchOptions.fetchLimit = 1
@@ -83,6 +83,7 @@ public class ImagePickerViewCoordinator: NSObject, UINavigationControllerDelegat
             
             if let phAsset = fetchResult.firstObject {
                 self.imageIds.append(phAsset.localIdentifier)
+                print("Success! \( self.imageIds)")
             }
             
         }
