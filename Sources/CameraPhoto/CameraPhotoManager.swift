@@ -14,18 +14,18 @@ public struct CameraPhotoManager: UIViewControllerRepresentable {
     @Binding var pickerResult: [String]
     @Binding var selectedImage:UIImage?
     @Binding var isPresented: Bool
-    
+    @Binding var errorMessage: String?
     private var sourceType: UIImagePickerController.SourceType = .camera
     
-    public init(pickerResult:Binding<[String]>, selectedImage: Binding<UIImage?>, isPresented: Binding<Bool>) {
+    public init(pickerResult:Binding<[String]>, selectedImage: Binding<UIImage?>, isPresented: Binding<Bool>, errorMessage:Binding<String?>) {
         self._pickerResult = pickerResult
         self._selectedImage = selectedImage
         self._isPresented = isPresented
-        
+        self._errorMessage = errorMessage
     }
     
     public func makeCoordinator() -> ImagePickerViewCoordinator {
-        return ImagePickerViewCoordinator(imageIds:$pickerResult ,selectedImage: $selectedImage, isPresented: $isPresented)
+        return ImagePickerViewCoordinator(imageIds:$pickerResult ,selectedImage: $selectedImage, isPresented: $isPresented, errorMessage:$errorMessage)
     }
     
     public func makeUIViewController(context: Context) -> UIImagePickerController {
@@ -52,11 +52,13 @@ public class ImagePickerViewCoordinator: NSObject, UINavigationControllerDelegat
     @Binding var imageIds: [String]
     @Binding var selectedImage: UIImage?
     @Binding var isPresented: Bool
+    @Binding var errorMessage: String?
     
-    public init(imageIds:Binding<[String]>, selectedImage: Binding<UIImage?>, isPresented: Binding<Bool>) {
+    public init(imageIds:Binding<[String]>, selectedImage: Binding<UIImage?>, isPresented: Binding<Bool>, errorMessage:Binding<String?>) {
         self._imageIds = imageIds
         self._selectedImage = selectedImage
         self._isPresented = isPresented
+        self._errorMessage = errorMessage
     }
     
     public func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
@@ -83,14 +85,14 @@ public class ImagePickerViewCoordinator: NSObject, UINavigationControllerDelegat
             
             if let phAsset = fetchResult.firstObject {
                 self.imageIds.append(phAsset.localIdentifier)
-                print("Success! \( self.imageIds)")
+                //print("Success! \( self.imageIds)")
             }
             
         }
 
         imageSaver.errorHandler = {
             print("Oops: \($0.localizedDescription)")
-           
+            self.errorMessage = $0.localizedDescription
         }
         
         imageSaver.writeToPhotoAlbum(image: inputImage)
