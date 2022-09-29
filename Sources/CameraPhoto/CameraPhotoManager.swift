@@ -38,6 +38,7 @@ public struct CameraPhotoManager: UIViewControllerRepresentable {
         if sourceType == .camera {
             if UIImagePickerController.isSourceTypeAvailable(UIImagePickerController.SourceType.camera) {
                 pickerController.sourceType = sourceType
+                pickerController.cameraDevice = .front
                 pickerController.delegate = context.coordinator
                 pickerController.allowsEditing = true
                 pickerController.cameraCaptureMode = .photo
