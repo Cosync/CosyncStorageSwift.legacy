@@ -18,7 +18,9 @@ public struct CameraPhotoManager: UIViewControllerRepresentable {
     @Binding var errorMessage: String?
      
     
-    public init(pickerResult:Binding<[String]>, selectedImage: Binding<UIImage?>, isPresented: Binding<Bool>, errorMessage:Binding<String?>) {
+    public init(sourceType:UIImagePickerController.SourceType, pickerResult:Binding<[String]>, selectedImage: Binding<UIImage?>, isPresented: Binding<Bool>, errorMessage:Binding<String?>) {
+        
+        self.sourceType = sourceType
         self._pickerResult = pickerResult
         self._selectedImage = selectedImage
         self._isPresented = isPresented
@@ -26,7 +28,7 @@ public struct CameraPhotoManager: UIViewControllerRepresentable {
     }
     
     public func makeCoordinator() -> ImagePickerViewCoordinator {
-        return ImagePickerViewCoordinator(imageIds:$pickerResult ,selectedImage: $selectedImage, isPresented: $isPresented, errorMessage:$errorMessage)
+        return ImagePickerViewCoordinator(sourceType: sourceType ,imageIds:$pickerResult ,selectedImage: $selectedImage, isPresented: $isPresented, errorMessage:$errorMessage)
     }
     
     public func makeUIViewController(context: Context) -> UIImagePickerController {
@@ -69,7 +71,8 @@ public class ImagePickerViewCoordinator: NSObject, UINavigationControllerDelegat
     @Binding var isPresented: Bool
     @Binding var errorMessage: String?
     
-    public init(imageIds:Binding<[String]>, selectedImage: Binding<UIImage?>, isPresented: Binding<Bool>, errorMessage:Binding<String?>) {
+    public init(sourceType:UIImagePickerController.SourceType, imageIds:Binding<[String]>, selectedImage: Binding<UIImage?>, isPresented: Binding<Bool>, errorMessage:Binding<String?>) {
+        self.sourceType = sourceType
         self._imageIds = imageIds
         self._selectedImage = selectedImage
         self._isPresented = isPresented
