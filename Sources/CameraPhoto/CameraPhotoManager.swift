@@ -95,16 +95,15 @@ public class ImagePickerViewCoordinator: NSObject, UINavigationControllerDelegat
     
     public func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
         
-        print(info[UIImagePickerController.InfoKey.imageURL] as Any)
-        
         if let image = info[UIImagePickerController.InfoKey.originalImage] as? UIImage {
             self.selectedImage = image
             
             if sourceType == .camera {
                 saveImageToCameraRoll(inputImage: image)
             }
+            
             else {
-                 
+                self.errorMessage = "This class cannot get image indentifier. Please use asset picker instead."
             }
         }
         self.isPresented = false
@@ -122,6 +121,7 @@ public class ImagePickerViewCoordinator: NSObject, UINavigationControllerDelegat
             let fetchOptions = PHFetchOptions()
             fetchOptions.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: false)]
             fetchOptions.fetchLimit = 1
+             
             let fetchResult = PHAsset.fetchAssets(with: .image, options: fetchOptions)
             
             if let phAsset = fetchResult.firstObject {
