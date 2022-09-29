@@ -11,11 +11,12 @@ import UIKit
 @available(iOS 15.0, *)
 public struct CameraPhotoManager: UIViewControllerRepresentable {
     
+    var sourceType: UIImagePickerController.SourceType = .photoLibrary
     @Binding var pickerResult: [String]
     @Binding var selectedImage:UIImage?
     @Binding var isPresented: Bool
     @Binding var errorMessage: String?
-    private var sourceType: UIImagePickerController.SourceType = .camera
+     
     
     public init(pickerResult:Binding<[String]>, selectedImage: Binding<UIImage?>, isPresented: Binding<Bool>, errorMessage:Binding<String?>) {
         self._pickerResult = pickerResult
@@ -29,14 +30,28 @@ public struct CameraPhotoManager: UIViewControllerRepresentable {
     }
     
     public func makeUIViewController(context: Context) -> UIImagePickerController {
+        
         let pickerController = UIImagePickerController()
-        pickerController.sourceType = sourceType
-        pickerController.delegate = context.coordinator
-        pickerController.allowsEditing = true
-        pickerController.cameraCaptureMode = .photo
-        pickerController.showsCameraControls = true
+        if UIImagePickerController.isSourceTypeAvailable(UIImagePickerController.SourceType.camera) {
+            
+            pickerController.sourceType = sourceType
+            pickerController.delegate = context.coordinator
+            pickerController.allowsEditing = true
+            if sourceType == .camera {
+                pickerController.cameraCaptureMode = .photo
+                pickerController.showsCameraControls = true
+            }
+        
+        }
+        else{
+            self.errorMessage = "You dont have camera."
+             
+        }
         return pickerController
+        
     }
+    
+   
 
     public func updateUIViewController(_ uiViewController: UIImagePickerController, context: Context) {
         // Nothing to update here
@@ -48,7 +63,7 @@ public struct CameraPhotoManager: UIViewControllerRepresentable {
 
 @available(iOS 15.0, *)
 public class ImagePickerViewCoordinator: NSObject, UINavigationControllerDelegate, UIImagePickerControllerDelegate {
-    
+    var sourceType: UIImagePickerController.SourceType = .photoLibrary
     @Binding var imageIds: [String]
     @Binding var selectedImage: UIImage?
     @Binding var isPresented: Bool
@@ -62,9 +77,18 @@ public class ImagePickerViewCoordinator: NSObject, UINavigationControllerDelegat
     }
     
     public func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
+        
+        print(info[UIImagePickerController.InfoKey.imageURL] as Any)
+        
         if let image = info[UIImagePickerController.InfoKey.originalImage] as? UIImage {
             self.selectedImage = image
-            saveImageToCameraRoll(inputImage: image)
+            
+            if sourceType == .camera {
+                saveImageToCameraRoll(inputImage: image)
+            }
+            else {
+                 
+            }
         }
         self.isPresented = false
     }
