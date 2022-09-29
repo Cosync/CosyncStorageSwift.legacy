@@ -34,21 +34,35 @@ public struct CameraPhotoManager: UIViewControllerRepresentable {
     public func makeUIViewController(context: Context) -> UIImagePickerController {
         
         let pickerController = UIImagePickerController()
-        if UIImagePickerController.isSourceTypeAvailable(UIImagePickerController.SourceType.camera) {
-            
-            pickerController.sourceType = sourceType
-            pickerController.delegate = context.coordinator
-            pickerController.allowsEditing = true
-            if sourceType == .camera {
+        
+        if sourceType == .camera {
+            if UIImagePickerController.isSourceTypeAvailable(UIImagePickerController.SourceType.camera) {
+                pickerController.sourceType = sourceType
+                pickerController.delegate = context.coordinator
+                pickerController.allowsEditing = true
                 pickerController.cameraCaptureMode = .photo
                 pickerController.showsCameraControls = true
             }
+            else{
+                self.errorMessage = "You dont have camera."
+            }
+           
+        }
+        else {
+            
+            if UIImagePickerController.isSourceTypeAvailable(UIImagePickerController.SourceType.photoLibrary){
+                pickerController.sourceType = sourceType
+                pickerController.delegate = context.coordinator
+                pickerController.allowsEditing = true
+            }
+            else{
+                self.errorMessage = "You don't have permission to access gallery."
+            }
+        }
         
-        }
-        else{
-            self.errorMessage = "You dont have camera."
-             
-        }
+        
+        
+        
         return pickerController
         
     }
