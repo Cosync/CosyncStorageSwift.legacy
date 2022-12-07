@@ -17,14 +17,16 @@ public struct AssetPicker: UIViewControllerRepresentable {
     @Binding var selectedVideoUrl:URL?
     @Binding var selectedType:String
     @Binding var isPresented: Bool
+    @Binding var errorMessage:String?
      
     public init(pickerResult:Binding<[String]>, selectedImage:Binding<UIImage?>, selectedVideoUrl:Binding<URL?>,
-                selectedType:Binding<String>, isPresented:Binding<Bool>) {
+                selectedType:Binding<String>, isPresented:Binding<Bool>, errorMessage:Binding<String?>) {
         self._pickerResult = pickerResult
         self._selectedImage = selectedImage
         self._selectedVideoUrl = selectedVideoUrl
         self._selectedType = selectedType
         self._isPresented = isPresented
+        self._errorMessage = errorMessage
     }
     
     
@@ -70,7 +72,6 @@ public struct AssetPicker: UIViewControllerRepresentable {
                 
                 for asset in results {
                     if let assetId = asset.assetIdentifier {
-                       // print("picked  assetId =", assetId)
                         assetIdList.append(assetId)
                     }
                      
@@ -92,17 +93,27 @@ public struct AssetPicker: UIViewControllerRepresentable {
                 self.parent.selectedType = "image"
                 
                 for asset in results {
-                    if let assetId = asset.assetIdentifier {
-                        assetIdList.append(assetId)
+                   
+                    
+                    if asset.itemProvider.canLoadObject(ofClass: UIImage.self) {
+                        
+                        asset.itemProvider.loadObject(ofClass: UIImage.self, completionHandler: { (object, error) in
+                            if let err = error {
+                                self.parent.errorMessage = err.localizedDescription
+                            }
+                            else if let image = object as? UIImage {
+                                
+                                if let assetId = asset.assetIdentifier {
+                                    assetIdList.append(assetId)
+                                }
+                                
+                                self.parent.selectedImage = image
+                            }
+                        })
                     }
-
-                    asset.itemProvider.loadObject(ofClass: UIImage.self, completionHandler: { (object, error) in
-
-                        if let image = object as? UIImage {
-                            self.parent.selectedImage = image
-                        }
-                    })
-
+                    else {
+                        self.parent.errorMessage = "Can not load this image."
+                    }
                 }
 
                 parent.pickerResult = assetIdList
