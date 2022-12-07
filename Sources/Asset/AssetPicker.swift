@@ -103,13 +103,14 @@ public struct AssetPicker: UIViewControllerRepresentable {
                             }
                             else if let image = object as? UIImage {
                                 
-                                if let assetId = asset.assetIdentifier {
-                                    assetIdList.append(assetId)
-                                }
-                                
                                 self.parent.selectedImage = image
                             }
                         })
+                        
+                        if let assetId = asset.assetIdentifier {
+                            assetIdList.append(assetId)
+                        }
+                        
                     }
                     else {
                         self.parent.errorMessage = "Can not load this image."
