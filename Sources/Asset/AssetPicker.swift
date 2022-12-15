@@ -18,18 +18,19 @@ public struct AssetPicker: UIViewControllerRepresentable {
     @Binding var selectedType:String
     @Binding var isPresented: Bool
     @Binding var errorMessage:String?
-    @State var preferedType:String = "all"
+    @State var preferredType:String = "all"
     @State var isMultipleSelection:Bool = false
      
     public init(pickerResult:Binding<[String]>, selectedImage:Binding<UIImage?>, selectedVideoUrl:Binding<URL?>,
-                selectedType:Binding<String>, isPresented:Binding<Bool>, errorMessage:Binding<String?>) {
+                selectedType:Binding<String>, isPresented:Binding<Bool>, errorMessage:Binding<String?>, preferredType:State<String>, isMultipleSelection:State<Bool>) {
         self._pickerResult = pickerResult
         self._selectedImage = selectedImage
         self._selectedVideoUrl = selectedVideoUrl
         self._selectedType = selectedType
         self._isPresented = isPresented
         self._errorMessage = errorMessage
-        
+        self._preferredType = preferredType
+        self._isMultipleSelection = isMultipleSelection
     }
     
     
@@ -37,10 +38,10 @@ public struct AssetPicker: UIViewControllerRepresentable {
          
         var config = PHPickerConfiguration(photoLibrary: PHPhotoLibrary.shared())
         
-        if(preferedType == "image"){
+        if(preferredType == "image"){
             config.filter = .any(of: [.images])
         }
-        else if(preferedType == "video"){
+        else if(preferredType == "video"){
             config.filter = .any(of: [.videos])
         }
         else {
