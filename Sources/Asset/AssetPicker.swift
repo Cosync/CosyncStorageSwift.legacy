@@ -29,6 +29,8 @@ public struct AssetPicker: UIViewControllerRepresentable {
         self._selectedType = selectedType
         self._isPresented = isPresented
         self._errorMessage = errorMessage
+        self.preferredType = preferredType
+        self.isMultipleSelection = isMultipleSelection
     }
     
     
