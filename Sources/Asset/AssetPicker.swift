@@ -18,6 +18,8 @@ public struct AssetPicker: UIViewControllerRepresentable {
     @Binding var selectedType:String
     @Binding var isPresented: Bool
     @Binding var errorMessage:String?
+    @State var preferedType:String = "all"
+    @State var isMultipleSelection:Bool = false
      
     public init(pickerResult:Binding<[String]>, selectedImage:Binding<UIImage?>, selectedVideoUrl:Binding<URL?>,
                 selectedType:Binding<String>, isPresented:Binding<Bool>, errorMessage:Binding<String?>) {
@@ -27,14 +29,26 @@ public struct AssetPicker: UIViewControllerRepresentable {
         self._selectedType = selectedType
         self._isPresented = isPresented
         self._errorMessage = errorMessage
+        
     }
     
     
     public func makeUIViewController(context: Context) -> PHPickerViewController {
          
         var config = PHPickerConfiguration(photoLibrary: PHPhotoLibrary.shared())
-        config.filter = .any(of: [.images, .videos])
-        config.selectionLimit = 1 //0 => any, set 1-2-3 for hard limit
+        
+        if(preferedType == "image"){
+            config.filter = .any(of: [.images])
+        }
+        else if(preferedType == "video"){
+            config.filter = .any(of: [.videos])
+        }
+        else {
+            config.filter = .any(of: [.images, .videos])
+        }
+        
+        config.selectionLimit = isMultipleSelection ? 0 : 1 //0 => any, set 1-2-3 for hard limit
+        
         config.preferredAssetRepresentationMode = .current
         config.selection = .ordered
         
