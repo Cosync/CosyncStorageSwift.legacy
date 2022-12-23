@@ -83,7 +83,7 @@ public class CosyncStorageSwift:NSObject, ObservableObject,  URLSessionTaskDeleg
             setUpUploadListener()
         }
         else{
-            print("invalid realm configuration")
+            print("CosyncStorageSwift: invalid realm configuration")
         }
        
     }
@@ -219,40 +219,57 @@ public class CosyncStorageSwift:NSObject, ObservableObject,  URLSessionTaskDeleg
         }
         
         let assetLocalIdentifier = assetUpload.extra
+        
         if let contentType = assetUpload.contentType {
             if assetLocalIdentifier.count > 0  {
                 
-                let identifiers = [assetLocalIdentifier]
-                let fetchResult = PHAsset.fetchAssets(withLocalIdentifiers: identifiers, options: nil)
-                if let phAsset = fetchResult.firstObject {
-                    let resources = PHAssetResource.assetResources(for: phAsset)
+                if contentType.contains("image") || contentType.contains("video"){
                     
-                    if let fileName = resources.first?.originalFilename {
-                        let imageManager = PHImageManager.default()
+                    let identifiers = [assetLocalIdentifier]
+                    let fetchResult = PHAsset.fetchAssets(withLocalIdentifiers: identifiers, options: nil)
+                    if let phAsset = fetchResult.firstObject {
+                        let resources = PHAssetResource.assetResources(for: phAsset)
                         
-                        let options = PHImageRequestOptions()
-                        options.resizeMode = PHImageRequestOptionsResizeMode.exact
-                        options.isSynchronous = true;
-                        
-                        imageManager.requestImage(for: phAsset, targetSize: CGSize(width: phAsset.pixelWidth, height: phAsset.pixelHeight), contentMode: .aspectFit, options: options, resultHandler: { image, _ in
+                        if let fileName = resources.first?.originalFilename {
+                            let imageManager = PHImageManager.default()
                             
-                            if  let image = image {
-                                if contentType.hasPrefix("video") {
-                                    
-                                     
-                                    imageManager.requestAVAsset(forVideo: phAsset, options: nil) { (asset, audioMix, info) in
-                                        if let asset = asset as? AVURLAsset {
-                                            self.uploadVideo(assetUpload: assetUpload, videoUrl: asset.url, image: image,  fileName: fileName, contentType:contentType)
+                            let options = PHImageRequestOptions()
+                            options.resizeMode = PHImageRequestOptionsResizeMode.exact
+                            options.isSynchronous = true;
+                            
+                            imageManager.requestImage(for: phAsset, targetSize: CGSize(width: phAsset.pixelWidth, height: phAsset.pixelHeight), contentMode: .aspectFit, options: options, resultHandler: { image, _ in
+                                
+                                if  let image = image {
+                                    if contentType.hasPrefix("video") {
+                                        
+                                        
+                                        imageManager.requestAVAsset(forVideo: phAsset, options: nil) { (asset, audioMix, info) in
+                                            if let asset = asset as? AVURLAsset {
+                                                self.uploadVideo(assetUpload: assetUpload, videoUrl: asset.url, image: image,  fileName: fileName, contentType:contentType)
+                                            }
                                         }
                                     }
+                                    else{
+                                        self.uploadImage(assetUpload: assetUpload, image: image, fileName:fileName, contentType:contentType)
+                                    }
                                 }
-                                else{
-                                    self.uploadImage(assetUpload: assetUpload, image: image, fileName:fileName, contentType:contentType)
-                                }
-                            }
-                        })
+                            })
+                        }
                     }
                 }
+                else {
+                    
+                    Task{
+                        do {
+                            try await uploadFileToURL(localSource: assetLocalIdentifier, writeUrl: assetUpload.writeUrl!, contentType: contentType)
+                            
+                        }
+                        catch{
+                            
+                        }
+                    }
+                }
+                
             }
         }
         
@@ -287,7 +304,7 @@ public class CosyncStorageSwift:NSObject, ObservableObject,  URLSessionTaskDeleg
                     }
                     catch {
                         self.uploadError(assetUpload)
-                        print("upload error")
+                        print("CosyncStorageSwift:  upload error")
                     }
                 }
             }
@@ -355,7 +372,7 @@ public class CosyncStorageSwift:NSObject, ObservableObject,  URLSessionTaskDeleg
                     }
                     catch {
                         self.uploadError(assetUpload)
-                        print("upload error")
+                        print("CosyncStorageSwift:  upload error")
                     }
                    
                 }
@@ -370,10 +387,7 @@ public class CosyncStorageSwift:NSObject, ObservableObject,  URLSessionTaskDeleg
     func uploadImageToURL(image: UIImage, fileName: String, writeUrl: String, contentType: String) async throws {
        
         var fullImageData: Data?
-        if contentType == "image/jpeg" {
-            fullImageData = image.jpegData(compressionQuality: 1.0)
-        }
-        else if contentType == "image/png" {
+        if contentType == "image/png" {
             fullImageData = image.pngData()
         }
         else{
@@ -389,18 +403,43 @@ public class CosyncStorageSwift:NSObject, ObservableObject,  URLSessionTaskDeleg
             let (_, response) = try await URLSession.shared.upload(for: urlRequest, from: fullImageData, delegate: self)
              
             guard let taskResponse = response as? HTTPURLResponse else {
-                print("no response")
+                print("CosyncStorageSwift:  no response")
                 throw UploadError.uploadFail
             }
             
             if taskResponse.statusCode != 200 {
-                print("response status code: \(taskResponse.statusCode)")
+                print("CosyncStorageSwift:  response status code: \(taskResponse.statusCode)")
                 throw UploadError.uploadFail
             }
         }
         else {
             
             throw UploadError.invalidImage
+        }
+    }
+    
+    @available(iOS 15.0, *)
+    func uploadFileToURL(localSource: String, writeUrl: String, contentType: String) async throws  {
+        
+        let fileData: Data? = try Data(contentsOf: URL(string: localSource)!)
+        
+        if let data = fileData {
+            
+            var urlRequest = URLRequest(url: URL(string: writeUrl)!)
+            urlRequest.httpMethod = "PUT"
+            urlRequest.setValue(contentType, forHTTPHeaderField: "Content-type")
+            
+            let (_, response) = try await URLSession.shared.upload(for: urlRequest, from: data, delegate: self)
+             
+            guard let taskResponse = response as? HTTPURLResponse else {
+                print("CosyncStorageSwift:  no response")
+                throw UploadError.uploadFail
+            }
+            
+            if taskResponse.statusCode != 200 {
+                print("CosyncStorageSwift:  response status code: \(taskResponse.statusCode)")
+                throw UploadError.uploadFail
+            }
         }
     }
     
@@ -418,12 +457,12 @@ public class CosyncStorageSwift:NSObject, ObservableObject,  URLSessionTaskDeleg
             let (_, response) = try await URLSession.shared.upload(for: urlRequest, from: fullVideoData, delegate: self)
              
             guard let taskResponse = response as? HTTPURLResponse else {
-                print("no response")
+                print("CosyncStorageSwift:  no response")
                 throw UploadError.uploadFail
             }
             
             if taskResponse.statusCode != 200 {
-                print("response status code: \(taskResponse.statusCode)")
+                print("CosyncStorageSwift:  response status code: \(taskResponse.statusCode)")
                 throw UploadError.uploadFail
             }
         }
@@ -456,7 +495,7 @@ public class CosyncStorageSwift:NSObject, ObservableObject,  URLSessionTaskDeleg
                     }
                     catch {
                         self.uploadError(assetUpload)
-                        print("upload error")
+                        print("CosyncStorageSwift:  upload error")
                     }
                 }
             }
@@ -601,6 +640,38 @@ public class CosyncStorageSwift:NSObject, ObservableObject,  URLSessionTaskDeleg
         }
     }
     
+    public func createFileAssetUpload(assetId: ObjectId,  path:String, expiredHours:Double, fileURL:URL ){
+        
+         
+        
+        do {
+            let attr = try FileManager.default.attributesOfItem(atPath: fileURL.path)
+            let dict = attr as NSDictionary
+            let fileSize = dict.fileSize()
+           
+            let cosyncAssetUpload = CosyncAssetUpload()
+            cosyncAssetUpload.expirationHours = expiredHours
+            cosyncAssetUpload._id = assetId
+            cosyncAssetUpload.userId =  self.currentUserId!
+            cosyncAssetUpload.sessionId = self.sessionId!
+            cosyncAssetUpload.extra = fileURL.path
+            cosyncAssetUpload.filePath = path + "/" + fileURL.lastPathComponent
+            cosyncAssetUpload.contentType = fileURL.mimeType()
+            cosyncAssetUpload.size = Int(fileSize)
+            cosyncAssetUpload.createdAt = Date()
+            cosyncAssetUpload.updatedAt = Date()
+            
+            if let userRealm = self.realm {
+                try! userRealm.write {
+                    userRealm.add(cosyncAssetUpload)
+                }
+            }
+        }
+        catch{
+            
+            print(error.localizedDescription)
+        }
+    }
     
     
     public func createAssetUpload(assetIdList: [String], expiredHours:Double, path:String, noCuts:Bool = false, originalSize:Int = 0, smallCutSize:Int = 0, mediumCutSize:Int = 0, largeCutSize:Int = 0) -> [ObjectId]{
@@ -620,16 +691,21 @@ public class CosyncStorageSwift:NSObject, ObservableObject,  URLSessionTaskDeleg
                     options.isNetworkAccessAllowed = true
                     
                     var duration = 0.0
-                    var contentType = "image/jpeg"
-                    if fileName.contains(".PNG") || fileName.contains(".png") {
-                        contentType = "image/png"
-                    }
-                    else if fileName.contains(".mov") || fileName.contains(".MOV"){
-                        contentType = "video/quicktime"
-                        duration = Double(phAsset.duration)
-                    }
+                    var contentType = fileName.mimeType()
                     
-            
+//                    if fileName.contains(".PNG") || fileName.contains(".png") {
+//                        contentType = "image/png"
+//                    }
+//                    else if fileName.contains(".mov") || fileName.contains(".MOV"){
+//                        contentType = "video/quicktime"
+//                        duration = Double(phAsset.duration)
+//                    }
+//                    else if fileName.contains(".m4a") {
+//                        contentType = "audio/x-m4a"
+//                    }
+                    
+                    print("CosyncStorageSwift contentType : \(contentType)")
+                    
                     let xRes = phAsset.pixelWidth
                     let yRes = phAsset.pixelHeight
                     let imageManager = PHImageManager.default()
