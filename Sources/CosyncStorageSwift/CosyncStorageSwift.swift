@@ -667,7 +667,7 @@ public class CosyncStorageSwift:NSObject, ObservableObject,  URLSessionTaskDeleg
                 cosyncAssetUpload._id = ObjectId.generate()
                 cosyncAssetUpload.userId =  self.currentUserId!
                 cosyncAssetUpload.sessionId = self.sessionId!
-                cosyncAssetUpload.extra = url.path
+                cosyncAssetUpload.extra = url.lastPathComponent
                 cosyncAssetUpload.filePath = path + "/" + url.lastPathComponent
                 cosyncAssetUpload.contentType = contentType
                 cosyncAssetUpload.size = Int(fileSize)
