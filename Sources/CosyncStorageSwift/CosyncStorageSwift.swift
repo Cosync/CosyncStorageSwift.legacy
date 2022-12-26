@@ -261,7 +261,7 @@ public class CosyncStorageSwift:NSObject, ObservableObject,  URLSessionTaskDeleg
                     DispatchQueue.main.async {
                         Task{
                             do {
-                                try await self.uploadFileToURL(localSource: assetLocalIdentifier, writeUrl: assetUpload.writeUrl!, contentType: contentType)
+                                try await self.uploadFileToURL(filename: assetLocalIdentifier, writeUrl: assetUpload.writeUrl!, contentType: contentType)
                                 
                             }
                             catch{
