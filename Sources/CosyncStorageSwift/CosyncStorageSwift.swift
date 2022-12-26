@@ -420,28 +420,36 @@ public class CosyncStorageSwift:NSObject, ObservableObject,  URLSessionTaskDeleg
     }
     
     @available(iOS 15.0, *)
-    func uploadFileToURL(localSource: String, writeUrl: String, contentType: String) async throws  {
+    func uploadFileToURL(filename: String, writeUrl: String, contentType: String) async throws  {
+        let data: Data
         
-        let fileData: Data? = try Data(contentsOf: URL(string: localSource)!)
-        
-        if let data = fileData {
-            
-            var urlRequest = URLRequest(url: URL(string: writeUrl)!)
-            urlRequest.httpMethod = "PUT"
-            urlRequest.setValue(contentType, forHTTPHeaderField: "Content-type")
-            
-            let (_, response) = try await URLSession.shared.upload(for: urlRequest, from: data, delegate: self)
-             
-            guard let taskResponse = response as? HTTPURLResponse else {
-                print("CosyncStorageSwift:  no response")
-                throw UploadError.uploadFail
-            }
-            
-            if taskResponse.statusCode != 200 {
-                print("CosyncStorageSwift:  response status code: \(taskResponse.statusCode)")
-                throw UploadError.uploadFail
-            }
+        guard let file = Bundle.main.url(forResource: filename, withExtension: nil)
+            else {
+                fatalError("Couldn't find \(filename) in main bundle.")
         }
+
+        do {
+            data = try Data(contentsOf: file)
+        } catch {
+            fatalError("Couldn't load \(filename) from main bundle:\n\(error)")
+        }
+            
+        var urlRequest = URLRequest(url: URL(string: writeUrl)!)
+        urlRequest.httpMethod = "PUT"
+        urlRequest.setValue(contentType, forHTTPHeaderField: "Content-type")
+        
+        let (_, response) = try await URLSession.shared.upload(for: urlRequest, from: data, delegate: self)
+         
+        guard let taskResponse = response as? HTTPURLResponse else {
+            print("CosyncStorageSwift:  no response")
+            throw UploadError.uploadFail
+        }
+        
+        if taskResponse.statusCode != 200 {
+            print("CosyncStorageSwift:  response status code: \(taskResponse.statusCode)")
+            throw UploadError.uploadFail
+        }
+        
     }
     
     @available(iOS 15.0, *)
