@@ -640,36 +640,50 @@ public class CosyncStorageSwift:NSObject, ObservableObject,  URLSessionTaskDeleg
         }
     }
     
-    public func createFileAssetUpload(assetId: ObjectId,  path:String, expiredHours:Double, fileURL:URL ){
+    public func createFileAssetUpload(fileURLs: [URL], path:String, expiredHours:Double ) throws -> [ObjectId] {
         
-         
+        var objectIdList:[ObjectId] = []
         
         do {
-            let attr = try FileManager.default.attributesOfItem(atPath: fileURL.path)
-            let dict = attr as NSDictionary
-            let fileSize = dict.fileSize()
-           
-            let cosyncAssetUpload = CosyncAssetUpload()
-            cosyncAssetUpload.expirationHours = expiredHours
-            cosyncAssetUpload._id = assetId
-            cosyncAssetUpload.userId =  self.currentUserId!
-            cosyncAssetUpload.sessionId = self.sessionId!
-            cosyncAssetUpload.extra = fileURL.path
-            cosyncAssetUpload.filePath = path + "/" + fileURL.lastPathComponent
-            cosyncAssetUpload.contentType = fileURL.mimeType()
-            cosyncAssetUpload.size = Int(fileSize)
-            cosyncAssetUpload.createdAt = Date()
-            cosyncAssetUpload.updatedAt = Date()
-            
-            if let userRealm = self.realm {
-                try! userRealm.write {
-                    userRealm.add(cosyncAssetUpload)
+            for url in fileURLs {
+                let attr = try FileManager.default.attributesOfItem(atPath: url.path)
+                let dict = attr as NSDictionary
+                let fileSize = dict.fileSize()
+                
+                let contentType = url.mimeType()
+                print("CosyncStorageSwift createFileAssetUpload contentType : \(contentType)")
+                
+                let cosyncAssetUpload = CosyncAssetUpload()
+                cosyncAssetUpload.expirationHours = expiredHours
+                cosyncAssetUpload._id = ObjectId.generate()
+                cosyncAssetUpload.userId =  self.currentUserId!
+                cosyncAssetUpload.sessionId = self.sessionId!
+                cosyncAssetUpload.extra = url.path
+                cosyncAssetUpload.filePath = path + "/" + url.lastPathComponent
+                cosyncAssetUpload.contentType = contentType
+                cosyncAssetUpload.size = Int(fileSize)
+                cosyncAssetUpload.createdAt = Date()
+                cosyncAssetUpload.updatedAt = Date()
+                objectIdList.append(cosyncAssetUpload._id)
+                
+                if let userRealm = self.realm {
+                    try! userRealm.write {
+                        userRealm.add(cosyncAssetUpload)
+                    }
+                }
+                else {
+                    print("createFileAssetUpload invalid realm instance")
                 }
             }
+            
+            return objectIdList
+                
         }
         catch{
-            
             print(error.localizedDescription)
+            throw(error)
+            
+             
         }
     }
     
@@ -690,21 +704,9 @@ public class CosyncStorageSwift:NSObject, ObservableObject,  URLSessionTaskDeleg
                     let options = PHContentEditingInputRequestOptions()
                     options.isNetworkAccessAllowed = true
                     
-                    var duration = 0.0
-                    var contentType = fileName.mimeType()
-                    
-//                    if fileName.contains(".PNG") || fileName.contains(".png") {
-//                        contentType = "image/png"
-//                    }
-//                    else if fileName.contains(".mov") || fileName.contains(".MOV"){
-//                        contentType = "video/quicktime"
-//                        duration = Double(phAsset.duration)
-//                    }
-//                    else if fileName.contains(".m4a") {
-//                        contentType = "audio/x-m4a"
-//                    }
-                    
-                    print("CosyncStorageSwift contentType : \(contentType)")
+                   
+                    let contentType = fileName.mimeType()
+                    print("CosyncStorageSwift createAssetUpload contentType : \(contentType)")
                     
                     let xRes = phAsset.pixelWidth
                     let yRes = phAsset.pixelHeight
@@ -733,7 +735,6 @@ public class CosyncStorageSwift:NSObject, ObservableObject,  URLSessionTaskDeleg
                             cosyncAssetUpload.filePath = path + "/" + fileName
                             cosyncAssetUpload.contentType = contentType
                             cosyncAssetUpload.size = fileSize
-                            cosyncAssetUpload.duration = duration
                             cosyncAssetUpload.color = color
                             cosyncAssetUpload.xRes = xRes
                             cosyncAssetUpload.yRes = yRes
@@ -764,19 +765,20 @@ public class CosyncStorageSwift:NSObject, ObservableObject,  URLSessionTaskDeleg
     
     @MainActor public func refreshAsset(assetId:String)  {
         
-        do {
+        self.app.currentUser!.functions.CosyncRefreshAsset([AnyBSON(assetId)])  { result, error in
             
-            self.app.currentUser!.functions.CosyncRefreshAsset([AnyBSON(assetId)])  { result, error in
-                let decoder = JSONDecoder()
+        
+            let decoder = JSONDecoder()
 
-                do {
-                    _ = try decoder.decode(AssetModel.self, from: Data(result!.stringValue!.utf8))
-                    
-                } catch {
-                    print(error.localizedDescription)
-                }
+            do {
+                _ = try decoder.decode(AssetModel.self, from: Data(result!.stringValue!.utf8))
+                
+            } catch {
+                print(error.localizedDescription)
+                
             }
         }
+        
         
     }
     
