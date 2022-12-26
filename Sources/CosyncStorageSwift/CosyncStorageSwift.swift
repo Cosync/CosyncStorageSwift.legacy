@@ -419,19 +419,24 @@ public class CosyncStorageSwift:NSObject, ObservableObject,  URLSessionTaskDeleg
         }
     }
     
+    func getDocumentsDirectory() -> URL {
+        // find all possible documents directories for this user
+        let paths = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)
+
+        // just send back the first one, which ought to be the only one
+        return paths[0]
+    }
+    
     @available(iOS 15.0, *)
     func uploadFileToURL(filename: String, writeUrl: String, contentType: String) async throws  {
-        let data: Data
         
-        guard let file = Bundle.main.url(forResource: filename, withExtension: nil)
-            else {
-                fatalError("Couldn't find \(filename) in main bundle.")
-        }
+        let data: Data
+        let url = getDocumentsDirectory().appendingPathComponent(filename)
 
         do {
-            data = try Data(contentsOf: file)
+            data = try Data(contentsOf: url)
         } catch {
-            fatalError("Couldn't load \(filename) from main bundle:\n\(error)")
+            fatalError("Couldn't load \(filename) from main bundle:\n\(error.localizedDescription)")
         }
             
         var urlRequest = URLRequest(url: URL(string: writeUrl)!)
