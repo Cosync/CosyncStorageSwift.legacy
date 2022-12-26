@@ -263,9 +263,12 @@ public class CosyncStorageSwift:NSObject, ObservableObject,  URLSessionTaskDeleg
                             do {
                                 try await self.uploadFileToURL(filename: assetLocalIdentifier, writeUrl: assetUpload.writeUrl!, contentType: contentType)
                                 
+                                self.uploadSuccess(assetUpload: assetUpload)
+                                
                             }
                             catch{
-                                
+                                print("CosyncStorage: upload file fails ")
+                                self.uploadError(assetUpload)
                             }
                         }
                     }
