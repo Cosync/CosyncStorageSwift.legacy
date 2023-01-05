@@ -179,13 +179,10 @@ public class CosyncStorageSwift:NSObject, ObservableObject,  URLSessionTaskDeleg
                     }
                     
                     if(!deletions.isEmpty){
-                        self.assetLists.removeAll()
-                        self.allAssets.removeAll()
-                        
-                        for asset in results {
-                            self.assetLists.append(asset)
-                            self.allAssets.append(asset)
-                        }
+                        print("before on delete asset assetLists = \(self.assetLists.count)")
+                        self.assetLists = self.assetLists.filter{$0.isInvalidated == false}
+                        self.allAssets = self.assetLists.filter{$0.isInvalidated == false}
+                        print("after on delete asset assetLists = \(self.assetLists.count)")
                     }
                     
                     
