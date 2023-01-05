@@ -181,10 +181,13 @@ public class CosyncStorageSwift:NSObject, ObservableObject,  URLSessionTaskDeleg
                     if(!deletions.isEmpty){
                         for index in deletions {
                             
-                            self.assetLists.remove(at: index)
-                            self.allAssets.remove(at: index)
+                            if self.assetLists.count >= index {
+                                
+                                self.assetLists.remove(at: index)
+                                self.allAssets.remove(at: index)
+                            }
                             
-//                            let asset = self.assetLists[index] 
+//                            let asset = self.assetLists[index]
 //                            if asset.isInvalidated == false {
 //                                self.assetLists = self.assetLists.filter{$0._id != asset._id}
 //                                self.allAssets = self.allAssets.filter{$0._id != asset._id}
