@@ -94,19 +94,27 @@ public struct AssetPicker: UIViewControllerRepresentable {
                 parent.pickerResult = assetIdList
                 let progress:Progress = provider.loadFileRepresentation(forTypeIdentifier: UTType.movie.identifier) { fileURL, err in
                 //provider.loadFileRepresentation(forTypeIdentifier: UTType.movie.identifier, options: [:]) { [self] (videoURL, error) in
-                   
-                    if let url = fileURL {
-                        let fm = FileManager.default
-                        let filename = url.lastPathComponent
-                        let destination = fm.temporaryDirectory.appendingPathComponent(filename)
-                        try! fm.copyItem(at: url, to: destination)
-                        self.parent.selectedVideoUrl = destination
-                         
+                    do {
+                        if let url = fileURL {
+                            let fm = FileManager.default
+                            let filename = url.lastPathComponent
+                            let destination = fm.temporaryDirectory.appendingPathComponent(filename)
+                            if fm.fileExists(atPath: destination.path) {
+                                try fm.removeItem(at: destination)
+                            }
+                            
+                            try fm.copyItem(at: url, to: destination)
+                            self.parent.selectedVideoUrl = destination
+                            
+                        }
+                        else {
+                            self.parent.errorMessage = "Can not load this video."
+                        }
+                        self.parent.selectedType = "video"
                     }
-                    else {
+                    catch{
                         self.parent.errorMessage = "Can not load this video."
                     }
-                    self.parent.selectedType = "video"
                 }
                 
                 print("load progress \(String(describing: progress.estimatedTimeRemaining))")
