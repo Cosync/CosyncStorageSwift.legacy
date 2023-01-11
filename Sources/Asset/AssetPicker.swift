@@ -96,8 +96,11 @@ public struct AssetPicker: UIViewControllerRepresentable {
                 //provider.loadFileRepresentation(forTypeIdentifier: UTType.movie.identifier, options: [:]) { [self] (videoURL, error) in
                    
                     if let url = fileURL {
-                        
-                        self.parent.selectedVideoUrl = url
+                        let fm = FileManager.default
+                        let filename = url.lastPathComponent
+                        let destination = fm.temporaryDirectory.appendingPathComponent(filename)
+                        try! fm.copyItem(at: url, to: destination)
+                        self.parent.selectedVideoUrl = destination
                          
                     }
                     else {
