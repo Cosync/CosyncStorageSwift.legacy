@@ -12,15 +12,17 @@ import UIKit
 public struct CameraPhotoManager: UIViewControllerRepresentable {
     
     var sourceType: UIImagePickerController.SourceType = .photoLibrary
+    var cameraCaptureMode:UIImagePickerController.CameraCaptureMode = .photo
     @Binding var pickerResult: [String]
     @Binding var selectedImage:UIImage?
     @Binding var isPresented: Bool
     @Binding var errorMessage: String?
-     
     
-    public init(sourceType:UIImagePickerController.SourceType, pickerResult:Binding<[String]>, selectedImage: Binding<UIImage?>, isPresented: Binding<Bool>, errorMessage:Binding<String?>) {
+    
+    public init(sourceType:UIImagePickerController.SourceType, captureMode:UIImagePickerController.CameraCaptureMode, pickerResult:Binding<[String]>, selectedImage: Binding<UIImage?>, isPresented: Binding<Bool>, errorMessage:Binding<String?>) {
         
         self.sourceType = sourceType
+        self.cameraCaptureMode = captureMode
         self._pickerResult = pickerResult
         self._selectedImage = selectedImage
         self._isPresented = isPresented
@@ -38,11 +40,12 @@ public struct CameraPhotoManager: UIViewControllerRepresentable {
         if sourceType == .camera {
             if UIImagePickerController.isSourceTypeAvailable(UIImagePickerController.SourceType.camera) {
                 pickerController.sourceType = sourceType
-                pickerController.cameraDevice = .front
+                pickerController.cameraCaptureMode = cameraCaptureMode
+                pickerController.cameraDevice = cameraCaptureMode == .photo ? .front : .rear
                 pickerController.delegate = context.coordinator
                 pickerController.allowsEditing = true
-                pickerController.cameraCaptureMode = .photo
                 pickerController.showsCameraControls = true
+                pickerController.modalPresentationStyle = .fullScreen
             }
             else{
                 self.errorMessage = "You dont have camera."
@@ -83,6 +86,7 @@ public class ImagePickerViewCoordinator: NSObject, UINavigationControllerDelegat
     var sourceType: UIImagePickerController.SourceType = .photoLibrary
     @Binding var imageIds: [String]
     @Binding var selectedImage: UIImage?
+     
     @Binding var isPresented: Bool
     @Binding var errorMessage: String?
     

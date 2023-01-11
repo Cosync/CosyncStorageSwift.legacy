@@ -92,13 +92,16 @@ public struct AssetPicker: UIViewControllerRepresentable {
                      
                 }
                 parent.pickerResult = assetIdList
-            
-                provider.loadItem(forTypeIdentifier: UTType.movie.identifier, options: [:]) { [self] (videoURL, error) in
+                provider.loadFileRepresentation(forTypeIdentifier: UTType.movie.identifier) { fileURL, err in
+                //provider.loadFileRepresentation(forTypeIdentifier: UTType.movie.identifier, options: [:]) { [self] (videoURL, error) in
                    
-                    if let url = videoURL as? URL {
+                    if let url = fileURL {
                         
                         self.parent.selectedVideoUrl = url
                          
+                    }
+                    else {
+                        self.parent.errorMessage = "Can not load this video."
                     }
                     self.parent.selectedType = "video"
                 }
