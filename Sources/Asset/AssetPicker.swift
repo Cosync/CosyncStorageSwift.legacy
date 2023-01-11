@@ -92,7 +92,7 @@ public struct AssetPicker: UIViewControllerRepresentable {
                      
                 }
                 parent.pickerResult = assetIdList
-                provider.loadFileRepresentation(forTypeIdentifier: UTType.movie.identifier) { fileURL, err in
+                let progress:Progress = provider.loadFileRepresentation(forTypeIdentifier: UTType.movie.identifier) { fileURL, err in
                 //provider.loadFileRepresentation(forTypeIdentifier: UTType.movie.identifier, options: [:]) { [self] (videoURL, error) in
                    
                     if let url = fileURL {
@@ -105,6 +105,8 @@ public struct AssetPicker: UIViewControllerRepresentable {
                     }
                     self.parent.selectedType = "video"
                 }
+                
+                print("load progress \(String(describing: progress.estimatedTimeRemaining))")
             }
             else if provider.hasItemConformingToTypeIdentifier(UTType.image.identifier) {
                 
