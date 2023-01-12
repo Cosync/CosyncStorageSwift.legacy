@@ -48,6 +48,7 @@ public class CosyncStorageSwift:NSObject, ObservableObject,  URLSessionTaskDeleg
     @Published public var uploadTask = ""
     @Published public var uploadAmount = 0.0
     @Published public var uploadAssetId = ObjectId()
+    @Published public var uploadAssetFail = ""
     
     private var cosyncAssetUpload: CosyncAssetUpload?
     private var uploadToken: NotificationToken! = nil
@@ -596,12 +597,14 @@ public class CosyncStorageSwift:NSObject, ObservableObject,  URLSessionTaskDeleg
     
     func uploadError(_ assetUpload: CosyncAssetUpload) -> Void {
         uploadStart = false
+       
         DispatchQueue.main.async {
             if let userRealm = self.realm {
                 try! userRealm.write {
                     assetUpload.status = "error"
                 }
             }
+            self.uploadAssetFail = " Fail to upload asset \(assetUpload.extra)"
         }
 
     }
