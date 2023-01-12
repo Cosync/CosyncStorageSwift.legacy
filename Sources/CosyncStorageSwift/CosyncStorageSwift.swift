@@ -219,7 +219,7 @@ public class CosyncStorageSwift:NSObject, ObservableObject,  URLSessionTaskDeleg
         if let contentType = assetUpload.contentType {
             if assetLocalIdentifier.count > 0  {
                 
-                if contentType.contains("image") || contentType.contains("video"){
+                if contentType.contains("image"){
                     
                     let identifiers = [assetLocalIdentifier]
                     let fetchResult = PHAsset.fetchAssets(withLocalIdentifiers: identifiers, options: nil)
