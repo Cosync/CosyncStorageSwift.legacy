@@ -430,7 +430,13 @@ public class CosyncStorageSwift:NSObject, ObservableObject,  URLSessionTaskDeleg
     func uploadFileToURL(filename: String, writeUrl: String, contentType: String) async throws  {
         
         let data: Data
-        let url = getDocumentsDirectory().appendingPathComponent(filename)
+        
+        var url = getDocumentsDirectory().appendingPathComponent(filename)
+        
+        if contentType.contains("video"){
+            url = FileManager.default.temporaryDirectory.appendingPathComponent(filename)
+        }
+         
 
         do {
             data = try Data(contentsOf: url)
