@@ -43,7 +43,7 @@ public class CosyncStorageSwift:NSObject, ObservableObject,  URLSessionTaskDeleg
     @Published public var uploadedAsset = CosyncAsset()
     @Published public var assetLists = [CosyncAsset]()
     @Published public var allAssets = [CosyncAsset]()
-    @Published public var uploadedAssetList:[String] = []
+    @Published public var uploadedAssetList = [CosyncAssetUpload]()
     @Published public var uploadStart = false
     @Published public var uploadTask = ""
     @Published public var uploadAmount = 0.0
@@ -299,9 +299,9 @@ public class CosyncStorageSwift:NSObject, ObservableObject,  URLSessionTaskDeleg
                         
                         self.uploadSuccess(assetUpload:assetUpload)
                         
-                        if let url = assetUpload.url {
-                            self.uploadedAssetList.append(url)
-                        }
+//                        if let url = assetUpload.url {
+//                            self.uploadedAssetList.append(url)
+//                        }
                     }
                     catch {
                         self.uploadError(assetUpload)
@@ -345,25 +345,25 @@ public class CosyncStorageSwift:NSObject, ObservableObject,  URLSessionTaskDeleg
                         self.uploadTask = "small-"+fileName
                         self.uploadPhase = .uploadImageUrlSmall
                         try await self.uploadImageToURL(image: imageSmall!, fileName: "small-"+fileName, writeUrl: writeUrlSmall, contentType: contentType)
-                        if let urlSmall = assetUpload.urlSmall {
-                            self.uploadedAssetList.append(urlSmall)
-                        }
+//                        if let urlSmall = assetUpload.urlSmall {
+//                            self.uploadedAssetList.append(urlSmall)
+//                        }
                     
                         
                         self.uploadTask = "medium-"+fileName
                         self.uploadPhase = .uploadImageUrlMedium
                         try await self.uploadImageToURL(image: imageMedium!, fileName: "medium-"+fileName, writeUrl: writeUrlMedium, contentType: contentType)
-                        if let urlMedium = assetUpload.urlMedium {
-                            self.uploadedAssetList.append(urlMedium)
-                        }
+//                        if let urlMedium = assetUpload.urlMedium {
+//                            self.uploadedAssetList.append(urlMedium)
+//                        }
                     
                         
                         self.uploadTask = "large-"+fileName
                         self.uploadPhase = .uploadImageUrlLarge
                         try await self.uploadImageToURL(image: imageLarge!, fileName: "large-"+fileName, writeUrl: writeUrlLarge, contentType: contentType)
-                        if let urlLarge = assetUpload.urlLarge {
-                            self.uploadedAssetList.append(urlLarge)
-                        }
+//                        if let urlLarge = assetUpload.urlLarge {
+//                            self.uploadedAssetList.append(urlLarge)
+//                        }
                         
                    
                         self.uploadSuccess(assetUpload:assetUpload)
@@ -562,25 +562,25 @@ public class CosyncStorageSwift:NSObject, ObservableObject,  URLSessionTaskDeleg
                         self.uploadPhase = .uploadVideoUrlSmall
                         self.uploadTask = "small-"+fileName
                         try await self.uploadImageToURL(image: imageSmall!, fileName: "small-"+fileName, writeUrl: writeUrlSmall, contentType: imageContentType)
-                        if let urlSmall = assetUpload.urlSmall {
-                            self.uploadedAssetList.append(urlSmall)
-                        }
+//                        if let urlSmall = assetUpload.urlSmall {
+//                            self.uploadedAssetList.append(urlSmall)
+//                        }
                         
                          
                         self.uploadPhase = .uploadVideoUrlMedium
                         self.uploadTask = "medium-"+fileName
                         try await self.uploadImageToURL(image: imageMedium!, fileName: "medium-"+fileName, writeUrl: writeUrlMedium, contentType: imageContentType)
-                        if let urlMedium = assetUpload.urlMedium {
-                            self.uploadedAssetList.append(urlMedium)
-                        }
+//                        if let urlMedium = assetUpload.urlMedium {
+//                            self.uploadedAssetList.append(urlMedium)
+//                        }
                         
                         
                         self.uploadPhase = .uploadVideoUrlLarge
                         self.uploadTask = "large-"+fileName
                         try await self.uploadImageToURL(image: imageLarge!, fileName: "large-"+fileName, writeUrl: writeUrlLarge, contentType: imageContentType)
-                        if let urlLarge = assetUpload.urlLarge {
-                            self.uploadedAssetList.append(urlLarge)
-                        }
+//                        if let urlLarge = assetUpload.urlLarge {
+//                            self.uploadedAssetList.append(urlLarge)
+//                        }
                         
                         self.uploadSuccess(assetUpload:assetUpload)
                         
@@ -612,12 +612,16 @@ public class CosyncStorageSwift:NSObject, ObservableObject,  URLSessionTaskDeleg
     func uploadSuccess( assetUpload: CosyncAssetUpload) -> Void {
         uploadStart = false
         DispatchQueue.main.async {
+            
+            self.uploadedAssetList.append(assetUpload)
+            
             if let userRealm = self.realm {
                 try! userRealm.write {
                     assetUpload.status = "uploaded"
                 }
             }
         }
+       
 
     }
     
