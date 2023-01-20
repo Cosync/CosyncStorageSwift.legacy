@@ -42,11 +42,13 @@ public struct AssetPicker: UIViewControllerRepresentable {
             config.filter = .any(of: [.images])
         }
         else if(preferredType == "video"){
-            config.filter = .any(of: [.videos])
+            config.filter = .all(of: [.videos])
+             
         }
         else {
             config.filter = .any(of: [.images, .videos])
         }
+        
         
         config.selectionLimit = isMultipleSelection ? 0 : 1 //0 => any, set 1-2-3 for hard limit
         

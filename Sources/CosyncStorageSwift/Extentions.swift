@@ -7,7 +7,8 @@
 
 import Foundation
 import UniformTypeIdentifiers
-
+import AVFoundation
+import SwiftUI
 
 extension NSURL {
     public func mimeType() -> String {
@@ -39,6 +40,23 @@ extension URL {
             return "application/octet-stream"
             // Fallback on earlier versions
         }
+    }
+    
+    
+    public func generateVideoThumbnail(seconds: Double = 0.0) -> UIImage? {
+        if self.mimeType().contains("video"){
+            let timestamp = CMTime(seconds: seconds, preferredTimescale: 60)
+            let asset = AVURLAsset(url: self)
+            let imageGenerator = AVAssetImageGenerator(asset: asset)
+            imageGenerator.appliesPreferredTrackTransform = true
+            
+            guard let cgImage = try? imageGenerator.copyCGImage(at: timestamp, actualTime: nil) else {
+                return nil
+            }
+            
+            return UIImage(cgImage: cgImage)
+        }
+        return nil
     }
 }
 
