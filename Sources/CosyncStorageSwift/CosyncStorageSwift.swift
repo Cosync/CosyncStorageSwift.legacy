@@ -661,7 +661,7 @@ public class CosyncStorageSwift:NSObject, ObservableObject,  URLSessionTaskDeleg
         }
     }
     
-    public func createFileAssetUpload(fileURLs: [URL], path:String, expiredHours:Double, uploadQueue:Bool = false , noCut:Bool = true ) throws -> [ObjectId] {
+    public func createFileAssetUpload(fileURLs: [URL], path:String, expiredHours:Double, uploadQueue:Bool, noCut:Bool ) throws -> [ObjectId] {
         
         var objectIdList:[ObjectId] = []
         cosyncAssetUploadQueue.removeAll()
