@@ -238,17 +238,6 @@ public class CosyncStorageSwift:NSObject, ObservableObject,  URLSessionTaskDeleg
                                 
                                 if  let image = image {
                                     self.uploadImage(assetUpload: assetUpload, image: image, fileName:fileName, contentType:contentType)
-                                    
-//                                    if contentType.hasPrefix("video") {
-//                                        imageManager.requestAVAsset(forVideo: phAsset, options: nil) { (asset, audioMix, info) in
-//                                            if let asset = asset as? AVURLAsset {
-//                                                self.uploadVideo(assetUpload: assetUpload, videoUrl: asset.url, image: image,  fileName: fileName, contentType:contentType)
-//                                            }
-//                                        }
-//                                    }
-//                                    else{
-//                                        self.uploadImage(assetUpload: assetUpload, image: image, fileName:fileName, contentType:contentType)
-//                                    }
                                 }
                             })
                         }
@@ -437,7 +426,7 @@ public class CosyncStorageSwift:NSObject, ObservableObject,  URLSessionTaskDeleg
         if contentType.contains("video"){
             url = FileManager.default.temporaryDirectory.appendingPathComponent(filename)
             if let preview = url.generateVideoThumbnail() {
-                uploadVideo(assetUpload: assetUpload, videoUrl: url, image: preview, fileName: filename, contentType: contentType)
+                uploadVideoAsset(assetUpload: assetUpload, videoUrl: url, image: preview, fileName: filename, contentType: contentType)
                 return
             }
             
@@ -448,7 +437,8 @@ public class CosyncStorageSwift:NSObject, ObservableObject,  URLSessionTaskDeleg
         do {
             data = try Data(contentsOf: url)
         } catch {
-            fatalError("Couldn't load \(filename) from main bundle:\n\(error.localizedDescription)")
+            print("CosyncStorageSwift:  read data fail: \(error.localizedDescription)")
+            throw UploadError.uploadFail
         }
         
         var urlRequest = URLRequest(url: URL(string: writeUrl)!)
@@ -495,7 +485,7 @@ public class CosyncStorageSwift:NSObject, ObservableObject,  URLSessionTaskDeleg
     }
     
     @available(iOS 15.0, *)
-    func uploadVideo(assetUpload:CosyncAssetUpload, videoUrl: URL, image: UIImage, fileName: String, contentType:String){
+    func uploadVideoAsset(assetUpload:CosyncAssetUpload, videoUrl: URL, image: UIImage, fileName: String, contentType:String){
         
         DispatchQueue.main.async {
             let imageContentType = "image/png"
@@ -521,7 +511,7 @@ public class CosyncStorageSwift:NSObject, ObservableObject,  URLSessionTaskDeleg
             
             
             if assetUpload.noCuts == false { // finished upload
-                self.uploadSuccess(assetUpload:assetUpload)
+                //self.uploadSuccess(assetUpload:assetUpload)
             }
             else { // create video image thumbnail
                 
@@ -578,7 +568,7 @@ public class CosyncStorageSwift:NSObject, ObservableObject,  URLSessionTaskDeleg
                 else {
                     
                     print("CosyncStorageSwift:  invalid image thumbnail uploaded url ")
-                    self.uploadSuccess(assetUpload:assetUpload)
+                    //self.uploadSuccess(assetUpload:assetUpload)
                 }
             }
         }
