@@ -444,6 +444,7 @@ public class CosyncStorageSwift:NSObject, ObservableObject,  URLSessionTaskDeleg
         }
         else {
             self.uploadSuccess(assetUpload: assetUpload)
+            self.uploadNextFileAsset(uploadedAsset: assetUpload)
         }
          
     }
@@ -492,6 +493,8 @@ public class CosyncStorageSwift:NSObject, ObservableObject,  URLSessionTaskDeleg
                     try await self.uploadImageToURL(image: image, fileName: "preview-"+fileName, writeUrl: writeUrlVideoPreview!, contentType: imageContentType)
                     
                     self.uploadSuccess(assetUpload:assetUpload)
+                    
+                    self.uploadNextFileAsset(uploadedAsset: assetUpload)
                 }
                 catch {
                     self.uploadError(assetUpload)
@@ -548,7 +551,7 @@ public class CosyncStorageSwift:NSObject, ObservableObject,  URLSessionTaskDeleg
                             
                             
                             self.uploadSuccess(assetUpload:assetUpload)
-                            
+                            self.uploadNextFileAsset(uploadedAsset: assetUpload)
                         }
                         catch{
                             print(error.localizedDescription)
@@ -656,15 +659,13 @@ public class CosyncStorageSwift:NSObject, ObservableObject,  URLSessionTaskDeleg
             }
       
             self.uploadAmount = Double(value) * 100.0
-            
-        
         }
     }
     
     public func createFileAssetUpload(fileURLs: [URL], path:String, expiredHours:Double, noCut:Bool = true ) throws -> [ObjectId] {
         
         var objectIdList:[ObjectId] = []
-        
+        cosyncAssetUploadQueue.removeAll()
         do {
             for url in fileURLs {
                 let attr = try FileManager.default.attributesOfItem(atPath: url.path)
