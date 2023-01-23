@@ -483,13 +483,14 @@ public class CosyncStorageSwift:NSObject, ObservableObject,  URLSessionTaskDeleg
             Task{
                 do {
                     let writeUrl = assetUpload.writeUrl
-                    let writeUrlVideoPreview = assetUpload.writeUrlVideoPreview
+                   
                     self.uploadAmount = 0.0
                     self.uploadPhase = .uploadVideoUrl
                     try await self.uploadVideoToURL(videoUrl: videoUrl, fileName: fileName, writeUrl: writeUrl!, contentType: contentType)
                    
                     self.uploadTask = "preview-"+fileName
                     self.uploadPhase = .uploadVideoUrlPreview
+                    let writeUrlVideoPreview = assetUpload.writeUrlVideoPreview
                     try await self.uploadImageToURL(image: image, fileName: "preview-"+fileName, writeUrl: writeUrlVideoPreview!, contentType: imageContentType)
                     
                    
@@ -660,7 +661,7 @@ public class CosyncStorageSwift:NSObject, ObservableObject,  URLSessionTaskDeleg
         }
     }
     
-    public func createFileAssetUpload(fileURLs: [URL], path:String, expiredHours:Double, noCut:Bool = true ) throws -> [ObjectId] {
+    public func createFileAssetUpload(fileURLs: [URL], path:String, expiredHours:Double, uploadQueue:Bool = false , noCut:Bool = true ) throws -> [ObjectId] {
         
         var objectIdList:[ObjectId] = []
         cosyncAssetUploadQueue.removeAll()
@@ -686,16 +687,28 @@ public class CosyncStorageSwift:NSObject, ObservableObject,  URLSessionTaskDeleg
                 cosyncAssetUpload.createdAt = Date()
                 cosyncAssetUpload.updatedAt = Date()
                 objectIdList.append(cosyncAssetUpload._id)
-                cosyncAssetUploadQueue.append(cosyncAssetUpload)
-            }
-            
-            if let userRealm = self.realm {
-                try! userRealm.write {
-                    userRealm.add(cosyncAssetUploadQueue[0])
+                
+                if (uploadQueue ) {
+                    cosyncAssetUploadQueue.append(cosyncAssetUpload)
+                }
+                else{
+                    if let userRealm = self.realm {
+                        try! userRealm.write {
+                            userRealm.add(cosyncAssetUpload)
+                        }
+                    }
                 }
             }
-            else {
-                print("createFileAssetUpload invalid realm instance")
+            
+            if(uploadQueue) {
+                if let userRealm = self.realm {
+                    try! userRealm.write {
+                        userRealm.add(cosyncAssetUploadQueue[0])
+                    }
+                }
+                else {
+                    print("createFileAssetUpload invalid realm instance")
+                }
             }
             
             return objectIdList
@@ -713,12 +726,14 @@ public class CosyncStorageSwift:NSObject, ObservableObject,  URLSessionTaskDeleg
         
         uploadSuccess(assetUpload:uploadedAsset)
         
-        if let currentSoundIndex = cosyncAssetUploadQueue.firstIndex(where: {$0._id == uploadedAsset._id}){
-            let next = currentSoundIndex + 1
-            if next < cosyncAssetUploadQueue.count {
-                if let userRealm = self.realm {
-                    try! userRealm.write {
-                        userRealm.add(cosyncAssetUploadQueue[next])
+        if cosyncAssetUploadQueue.count > 0 {
+            if let currentSoundIndex = cosyncAssetUploadQueue.firstIndex(where: {$0._id == uploadedAsset._id}){
+                let next = currentSoundIndex + 1
+                if next < cosyncAssetUploadQueue.count {
+                    if let userRealm = self.realm {
+                        try! userRealm.write {
+                            userRealm.add(cosyncAssetUploadQueue[next])
+                        }
                     }
                 }
             }
