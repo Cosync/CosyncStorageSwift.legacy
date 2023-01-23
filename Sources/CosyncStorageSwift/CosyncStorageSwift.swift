@@ -411,7 +411,7 @@ public class CosyncStorageSwift:NSObject, ObservableObject,  URLSessionTaskDeleg
         if contentType.contains("video"){
             url = FileManager.default.temporaryDirectory.appendingPathComponent(filename)
             if let preview = url.generateVideoThumbnail() {
-                uploadVideoAsset(assetUpload: assetUpload, videoUrl: url, image: preview, fileName: filename, contentType: contentType)
+                try await uploadVideoAsset(assetUpload: assetUpload, videoUrl: url, image: preview, fileName: filename, contentType: contentType)
                 return
             }
             
@@ -470,7 +470,7 @@ public class CosyncStorageSwift:NSObject, ObservableObject,  URLSessionTaskDeleg
     }
     
     @available(iOS 15.0, *)
-    func uploadVideoAsset(assetUpload:CosyncAssetUpload, videoUrl: URL, image: UIImage, fileName: String, contentType:String){
+    func uploadVideoAsset(assetUpload:CosyncAssetUpload, videoUrl: URL, image: UIImage, fileName: String, contentType:String) async throws{
         
         DispatchQueue.main.async {
             let imageContentType = "image/png"
