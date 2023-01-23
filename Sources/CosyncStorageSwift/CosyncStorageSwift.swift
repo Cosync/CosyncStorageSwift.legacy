@@ -503,7 +503,7 @@ public class CosyncStorageSwift:NSObject, ObservableObject,  URLSessionTaskDeleg
             }
             
             
-            if assetUpload.noCuts == false { // finished upload
+            if assetUpload.noCuts == true { // finished upload
                 
             }
             else { // create video image thumbnail
