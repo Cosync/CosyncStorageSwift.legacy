@@ -443,7 +443,7 @@ public class CosyncStorageSwift:NSObject, ObservableObject,  URLSessionTaskDeleg
             throw UploadError.uploadFail
         }
         else {
-            self.uploadSuccess(assetUpload: assetUpload)
+           
             self.uploadNextFileAsset(uploadedAsset: assetUpload)
         }
          
@@ -492,7 +492,7 @@ public class CosyncStorageSwift:NSObject, ObservableObject,  URLSessionTaskDeleg
                     self.uploadPhase = .uploadVideoUrlPreview
                     try await self.uploadImageToURL(image: image, fileName: "preview-"+fileName, writeUrl: writeUrlVideoPreview!, contentType: imageContentType)
                     
-                    self.uploadSuccess(assetUpload:assetUpload)
+                   
                     
                     self.uploadNextFileAsset(uploadedAsset: assetUpload)
                 }
@@ -548,9 +548,7 @@ public class CosyncStorageSwift:NSObject, ObservableObject,  URLSessionTaskDeleg
                             self.uploadPhase = .uploadVideoUrlLarge
                             self.uploadTask = "large-"+fileName
                             try await self.uploadImageToURL(image: imageLarge!, fileName: "large-"+fileName, writeUrl: writeUrlLarge, contentType: imageContentType)
-                            
-                            
-                            self.uploadSuccess(assetUpload:assetUpload)
+                           
                             self.uploadNextFileAsset(uploadedAsset: assetUpload)
                         }
                         catch{
@@ -712,6 +710,9 @@ public class CosyncStorageSwift:NSObject, ObservableObject,  URLSessionTaskDeleg
     }
     
     private func uploadNextFileAsset(uploadedAsset:CosyncAssetUpload){
+        
+        uploadSuccess(assetUpload:uploadedAsset)
+        
         if let currentSoundIndex = cosyncAssetUploadQueue.firstIndex(where: {$0._id == uploadedAsset._id}){
             let next = currentSoundIndex + 1
             if next < cosyncAssetUploadQueue.count {
