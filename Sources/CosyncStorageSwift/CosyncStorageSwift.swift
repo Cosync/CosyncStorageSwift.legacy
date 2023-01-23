@@ -606,57 +606,64 @@ public class CosyncStorageSwift:NSObject, ObservableObject,  URLSessionTaskDeleg
         DispatchQueue.main.async {
             
             var value: Float = 0.0
-            if( self.currentCosyncAssetUpload?.noCuts == false){
-                switch self.uploadPhase {
-                // Image upload
-                case .uploadImageUrl:
-                    value = progress * 0.50
-                case .uploadImageUrlSmall:
-                    value = 0.50 + (progress * 0.10)
-                case .uploadImageUrlMedium:
-                    value = 0.60 + (progress * 0.10)
-                case .uploadImageUrlLarge:
-                    value = 0.65 + (progress * 0.30)
-                    
-                // Video upload
-                case .uploadVideoUrl:
-                    value = progress * 0.70
-                case .uploadVideoUrlPreview:
-                    value = 0.70 + (progress * 0.05)
-                case .uploadVideoUrlSmall:
-                    value = 0.75 + (progress * 0.05)
-                case .uploadVideoUrlMedium:
-                    value = 0.80 + (progress * 0.05)
-                case .uploadVideoUrlLarge:
-                    value = 0.85 + (progress * 0.10)
-                }
-            }
-            else if ((self.currentCosyncAssetUpload?.contentType?.contains("video")) != nil){
-                switch self.uploadPhase {
-                case .uploadVideoUrl:
-                    value = progress * 0.85
-                case .uploadVideoUrlPreview:
-                    value = 0.85 + (progress * 0.15)
-                case .uploadVideoUrlSmall: break
-                    
-                case .uploadVideoUrlMedium: break
-                    
-                case .uploadVideoUrlLarge: break
-                     
-                case .uploadImageUrl: break
-                     
-                case .uploadImageUrlSmall: break
-                     
-                case .uploadImageUrlMedium: break
-                     
-                case .uploadImageUrlLarge: break
-                     
+            if let contentType = self.currentCosyncAssetUpload?.contentType {
+                if (contentType.contains("video") || contentType.contains("image")){
+                    if( self.currentCosyncAssetUpload?.noCuts == false){
+                        switch self.uploadPhase {
+                            // Image upload
+                        case .uploadImageUrl:
+                            value = progress * 0.50
+                        case .uploadImageUrlSmall:
+                            value = 0.50 + (progress * 0.10)
+                        case .uploadImageUrlMedium:
+                            value = 0.60 + (progress * 0.10)
+                        case .uploadImageUrlLarge:
+                            value = 0.65 + (progress * 0.30)
+                            
+                            // Video upload
+                        case .uploadVideoUrl:
+                            value = progress * 0.70
+                        case .uploadVideoUrlPreview:
+                            value = 0.70 + (progress * 0.05)
+                        case .uploadVideoUrlSmall:
+                            value = 0.75 + (progress * 0.05)
+                        case .uploadVideoUrlMedium:
+                            value = 0.80 + (progress * 0.05)
+                        case .uploadVideoUrlLarge:
+                            value = 0.85 + (progress * 0.10)
+                        }
+                    }
+                    else if ((self.currentCosyncAssetUpload?.contentType?.contains("video")) != nil){
+                        switch self.uploadPhase {
+                        case .uploadVideoUrl:
+                            value = progress * 0.85
+                        case .uploadVideoUrlPreview:
+                            value = 0.85 + (progress * 0.15)
+                        case .uploadVideoUrlSmall: break
+                            
+                        case .uploadVideoUrlMedium: break
+                            
+                        case .uploadVideoUrlLarge: break
+                            
+                        case .uploadImageUrl: break
+                            
+                        case .uploadImageUrlSmall: break
+                            
+                        case .uploadImageUrlMedium: break
+                            
+                        case .uploadImageUrlLarge: break
+                            
+                        }
+                    }
+                    else {
+                        value = progress
+                    }
                 }
             }
             else {
                 value = progress
             }
-      
+            
             self.uploadAmount = Double(value) * 100.0
         }
     }
