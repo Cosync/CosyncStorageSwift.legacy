@@ -50,10 +50,10 @@ public class CosyncStorageSwift:NSObject, ObservableObject,  URLSessionTaskDeleg
     @Published public var uploadAssetId = ObjectId()
     @Published public var uploadAssetFail = ""
     
-    private var cosyncAssetUpload: CosyncAssetUpload?
+    private var currentCosyncAssetUpload: CosyncAssetUpload?
     private var uploadToken: NotificationToken! = nil
     private var assetToken: NotificationToken! = nil
-    
+    private var cosyncAssetUploadQueue = [CosyncAssetUpload]()
     
     private var uploadPhase: UploadPhase = .uploadImageUrl
     
@@ -208,7 +208,7 @@ public class CosyncStorageSwift:NSObject, ObservableObject,  URLSessionTaskDeleg
             return
         }
         
-        cosyncAssetUpload = assetUpload
+        currentCosyncAssetUpload = assetUpload
         
         DispatchQueue.main.async {
             self.uploadStart = true
@@ -386,6 +386,7 @@ public class CosyncStorageSwift:NSObject, ObservableObject,  URLSessionTaskDeleg
                 print("CosyncStorageSwift:  response status code: \(taskResponse.statusCode)")
                 throw UploadError.uploadFail
             }
+            
         }
         else {
             
@@ -469,6 +470,7 @@ public class CosyncStorageSwift:NSObject, ObservableObject,  URLSessionTaskDeleg
                 print("CosyncStorageSwift:  response status code: \(taskResponse.statusCode)")
                 throw UploadError.uploadFail
             }
+             
         }
     }
     
@@ -602,7 +604,7 @@ public class CosyncStorageSwift:NSObject, ObservableObject,  URLSessionTaskDeleg
         DispatchQueue.main.async {
             
             var value: Float = 0.0
-            if( self.cosyncAssetUpload?.noCuts == false){
+            if( self.currentCosyncAssetUpload?.noCuts == false){
                 switch self.uploadPhase {
                 // Image upload
                 case .uploadImageUrl:
@@ -627,15 +629,39 @@ public class CosyncStorageSwift:NSObject, ObservableObject,  URLSessionTaskDeleg
                     value = 0.85 + (progress * 0.10)
                 }
             }
+            else if ((self.currentCosyncAssetUpload?.contentType?.contains("video")) != nil){
+                switch self.uploadPhase {
+                case .uploadVideoUrl:
+                    value = progress * 0.85
+                case .uploadVideoUrlPreview:
+                    value = 0.85 + (progress * 0.15)
+                case .uploadVideoUrlSmall: break
+                    
+                case .uploadVideoUrlMedium: break
+                    
+                case .uploadVideoUrlLarge: break
+                     
+                case .uploadImageUrl: break
+                     
+                case .uploadImageUrlSmall: break
+                     
+                case .uploadImageUrlMedium: break
+                     
+                case .uploadImageUrlLarge: break
+                     
+                }
+            }
             else {
                 value = progress
             }
       
             self.uploadAmount = Double(value) * 100.0
+            
+        
         }
     }
     
-    public func createFileAssetUpload(fileURLs: [URL], path:String, expiredHours:Double ) throws -> [ObjectId] {
+    public func createFileAssetUpload(fileURLs: [URL], path:String, expiredHours:Double, noCut:Bool = true ) throws -> [ObjectId] {
         
         var objectIdList:[ObjectId] = []
         
@@ -654,21 +680,23 @@ public class CosyncStorageSwift:NSObject, ObservableObject,  URLSessionTaskDeleg
                 cosyncAssetUpload.userId =  self.currentUserId!
                 cosyncAssetUpload.sessionId = self.sessionId!
                 cosyncAssetUpload.extra = url.lastPathComponent
+                cosyncAssetUpload.noCuts = noCut
                 cosyncAssetUpload.filePath = path + "/" + url.lastPathComponent
                 cosyncAssetUpload.contentType = contentType
                 cosyncAssetUpload.size = Int(fileSize)
                 cosyncAssetUpload.createdAt = Date()
                 cosyncAssetUpload.updatedAt = Date()
                 objectIdList.append(cosyncAssetUpload._id)
-                
-                if let userRealm = self.realm {
-                    try! userRealm.write {
-                        userRealm.add(cosyncAssetUpload)
-                    }
+                cosyncAssetUploadQueue.append(cosyncAssetUpload)
+            }
+            
+            if let userRealm = self.realm {
+                try! userRealm.write {
+                    userRealm.add(cosyncAssetUploadQueue[0])
                 }
-                else {
-                    print("createFileAssetUpload invalid realm instance")
-                }
+            }
+            else {
+                print("createFileAssetUpload invalid realm instance")
             }
             
             return objectIdList
@@ -679,6 +707,19 @@ public class CosyncStorageSwift:NSObject, ObservableObject,  URLSessionTaskDeleg
             throw(error)
             
              
+        }
+    }
+    
+    private func uploadNextFileAsset(uploadedAsset:CosyncAssetUpload){
+        if let currentSoundIndex = cosyncAssetUploadQueue.firstIndex(where: {$0._id == uploadedAsset._id}){
+            let next = currentSoundIndex + 1
+            if next < cosyncAssetUploadQueue.count {
+                if let userRealm = self.realm {
+                    try! userRealm.write {
+                        userRealm.add(cosyncAssetUploadQueue[next])
+                    }
+                }
+            }
         }
     }
     
@@ -779,7 +820,8 @@ public class CosyncStorageSwift:NSObject, ObservableObject,  URLSessionTaskDeleg
     
     
     public func reset(){
-        uploadedCosyncAssetUploadList = []
+        uploadedCosyncAssetUploadList.removeAll()
+        cosyncAssetUploadQueue.removeAll()
         uploadAmount = 0.0
         uploadStart = false
     }
