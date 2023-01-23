@@ -248,7 +248,7 @@ public class CosyncStorageSwift:NSObject, ObservableObject,  URLSessionTaskDeleg
                             do {
                                 try await self.uploadFileToURL(assetUpload:assetUpload ,filename: assetLocalIdentifier, writeUrl: assetUpload.writeUrl!, contentType: contentType)
                                 
-                                self.uploadSuccess(assetUpload: assetUpload)
+                               
                                 
                             }
                             catch{
@@ -441,6 +441,9 @@ public class CosyncStorageSwift:NSObject, ObservableObject,  URLSessionTaskDeleg
             print("CosyncStorageSwift:  response status code: \(taskResponse.statusCode)")
             throw UploadError.uploadFail
         }
+        else {
+            self.uploadSuccess(assetUpload: assetUpload)
+        }
          
     }
     
@@ -486,7 +489,7 @@ public class CosyncStorageSwift:NSObject, ObservableObject,  URLSessionTaskDeleg
                     self.uploadPhase = .uploadVideoUrlPreview
                     try await self.uploadImageToURL(image: image, fileName: "preview-"+fileName, writeUrl: writeUrlVideoPreview!, contentType: imageContentType)
                     
-                    
+                    self.uploadSuccess(assetUpload:assetUpload)
                 }
                 catch {
                     self.uploadError(assetUpload)
@@ -496,7 +499,7 @@ public class CosyncStorageSwift:NSObject, ObservableObject,  URLSessionTaskDeleg
             
             
             if assetUpload.noCuts == false { // finished upload
-                //self.uploadSuccess(assetUpload:assetUpload)
+                
             }
             else { // create video image thumbnail
                 
