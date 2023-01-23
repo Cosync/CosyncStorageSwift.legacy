@@ -43,7 +43,7 @@ public class CosyncStorageSwift:NSObject, ObservableObject,  URLSessionTaskDeleg
     @Published public var uploadedAsset = CosyncAsset()
     @Published public var assetLists = [CosyncAsset]()
     @Published public var allAssets = [CosyncAsset]()
-    @Published public var uploadedAssetList = [CosyncAssetUpload]()
+    @Published public var uploadedCosyncAssetUploadList = [CosyncAssetUpload]()
     @Published public var uploadStart = false
     @Published public var uploadTask = ""
     @Published public var uploadAmount = 0.0
@@ -212,7 +212,6 @@ public class CosyncStorageSwift:NSObject, ObservableObject,  URLSessionTaskDeleg
         
         DispatchQueue.main.async {
             self.uploadStart = true
-            self.uploadedAssetList = []
         }
         
         let assetLocalIdentifier = assetUpload.extra
@@ -287,10 +286,6 @@ public class CosyncStorageSwift:NSObject, ObservableObject,  URLSessionTaskDeleg
                         }
                         
                         self.uploadSuccess(assetUpload:assetUpload)
-                        
-//                        if let url = assetUpload.url {
-//                            self.uploadedAssetList.append(url)
-//                        }
                     }
                     catch {
                         self.uploadError(assetUpload)
@@ -334,26 +329,16 @@ public class CosyncStorageSwift:NSObject, ObservableObject,  URLSessionTaskDeleg
                         self.uploadTask = "small-"+fileName
                         self.uploadPhase = .uploadImageUrlSmall
                         try await self.uploadImageToURL(image: imageSmall!, fileName: "small-"+fileName, writeUrl: writeUrlSmall, contentType: contentType)
-//                        if let urlSmall = assetUpload.urlSmall {
-//                            self.uploadedAssetList.append(urlSmall)
-//                        }
-                    
+ 
                         
                         self.uploadTask = "medium-"+fileName
                         self.uploadPhase = .uploadImageUrlMedium
                         try await self.uploadImageToURL(image: imageMedium!, fileName: "medium-"+fileName, writeUrl: writeUrlMedium, contentType: contentType)
-//                        if let urlMedium = assetUpload.urlMedium {
-//                            self.uploadedAssetList.append(urlMedium)
-//                        }
-                    
+ 
                         
                         self.uploadTask = "large-"+fileName
                         self.uploadPhase = .uploadImageUrlLarge
                         try await self.uploadImageToURL(image: imageLarge!, fileName: "large-"+fileName, writeUrl: writeUrlLarge, contentType: contentType)
-//                        if let urlLarge = assetUpload.urlLarge {
-//                            self.uploadedAssetList.append(urlLarge)
-//                        }
-                        
                    
                         self.uploadSuccess(assetUpload:assetUpload)
                       
@@ -594,7 +579,7 @@ public class CosyncStorageSwift:NSObject, ObservableObject,  URLSessionTaskDeleg
         uploadStart = false
         DispatchQueue.main.async {
             
-            self.uploadedAssetList.append(assetUpload)
+            self.uploadedCosyncAssetUploadList.append(assetUpload)
             
             if let userRealm = self.realm {
                 try! userRealm.write {
@@ -791,7 +776,7 @@ public class CosyncStorageSwift:NSObject, ObservableObject,  URLSessionTaskDeleg
     
     
     public func reset(){
-        uploadedAssetList = []
+        uploadedCosyncAssetUploadList = []
         uploadAmount = 0.0
         uploadStart = false
     }
