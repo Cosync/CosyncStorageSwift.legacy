@@ -605,7 +605,7 @@ public class CosyncStorageSwift:NSObject, ObservableObject,  URLSessionTaskDeleg
         
         DispatchQueue.main.async {
             
-            var value: Float = 0.0
+            var value: Float = progress
             if let contentType = self.currentCosyncAssetUpload?.contentType {
                 if (contentType.contains("video") || contentType.contains("image")){
                     if( self.currentCosyncAssetUpload?.noCuts == false){
@@ -655,14 +655,8 @@ public class CosyncStorageSwift:NSObject, ObservableObject,  URLSessionTaskDeleg
                             
                         }
                     }
-                    else {
-                        value = progress
-                    }
                 }
-            }
-            else {
-                value = progress
-            }
+            } 
             
             self.uploadAmount = Double(value) * 100.0
         }
