@@ -726,13 +726,15 @@ public class CosyncStorageSwift:NSObject, ObservableObject,  URLSessionTaskDeleg
         
         uploadSuccess(assetUpload:uploadedAsset)
         
-        if cosyncAssetUploadQueue.count > 0 {
-            if let currentSoundIndex = cosyncAssetUploadQueue.firstIndex(where: {$0._id == uploadedAsset._id}){
-                let next = currentSoundIndex + 1
-                if next < cosyncAssetUploadQueue.count {
-                    if let userRealm = self.realm {
-                        try! userRealm.write {
-                            userRealm.add(cosyncAssetUploadQueue[next])
+        DispatchQueue.main.async {
+            if self.cosyncAssetUploadQueue.count > 0 {
+                if let currentSoundIndex = self.cosyncAssetUploadQueue.firstIndex(where: {$0._id == uploadedAsset._id}){
+                    let next = currentSoundIndex + 1
+                    if next < self.cosyncAssetUploadQueue.count {
+                        if let userRealm = self.realm {
+                            try! userRealm.write {
+                                userRealm.add(self.cosyncAssetUploadQueue[next])
+                            }
                         }
                     }
                 }
