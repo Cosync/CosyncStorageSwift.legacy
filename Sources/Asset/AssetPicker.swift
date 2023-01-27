@@ -138,7 +138,7 @@ public struct AssetPicker: UIViewControllerRepresentable {
                     if asset.itemProvider.canLoadObject(ofClass: UIImage.self) {
                         
                         asset.itemProvider.loadObject(ofClass: UIImage.self, completionHandler: { (object, error) in
-                            
+                             
                             if let err = error {
                                 self.parent.errorMessage = err.localizedDescription
                             }
@@ -151,9 +151,9 @@ public struct AssetPicker: UIViewControllerRepresentable {
                                 }
                                 
                                 if let phAsset = PHAsset.fetchAssets(withLocalIdentifiers: assetIdList, options: nil).firstObject,
-                                   let assetType = phAsset.value(forKey: "UniformTypeIdentifiers") as? String {
+                                   let assetType = asset.value(forKey: "UniformTypeIdentifiers") as? String {
                                     
-                                    var assetModel:[String:String] = ["assetIdentifier":asset.assetIdentifier!, "localIdentifier":phAsset.localIdentifier
+                                    let assetModel:[String:String] = ["assetIdentifier":asset.assetIdentifier!, "localIdentifier":phAsset.localIdentifier
                                                                   , "pixelWidth" : "\(phAsset.pixelWidth)", "pixelHeight": "\(phAsset.pixelHeight)",
                                                                   "mediaType":"\(phAsset.mediaType)", "assetType":assetType]
                                     
