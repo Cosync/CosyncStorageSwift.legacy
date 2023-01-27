@@ -14,6 +14,7 @@ public struct AssetPicker: UIViewControllerRepresentable {
     
     @Binding var pickerResult: [String]
     @Binding var selectedImage:UIImage?
+    @Binding var selectedAsset:PHAsset?
     @Binding var selectedVideoUrl:URL?
     @Binding var selectedType:String
     @Binding var isPresented: Bool
@@ -21,10 +22,11 @@ public struct AssetPicker: UIViewControllerRepresentable {
     var preferredType:String = "all"
     var isMultipleSelection:Bool = false
      
-    public init(pickerResult:Binding<[String]>, selectedImage:Binding<UIImage?>, selectedVideoUrl:Binding<URL?>,
+    public init(pickerResult:Binding<[String]>, selectedImage:Binding<UIImage?>, selectedAsset:Binding<PHAsset?>, selectedVideoUrl:Binding<URL?>,
                 selectedType:Binding<String>, isPresented:Binding<Bool>, errorMessage:Binding<String?>, preferredType:String, isMultipleSelection:Bool) {
         self._pickerResult = pickerResult
         self._selectedImage = selectedImage
+        self._selectedAsset = selectedAsset
         self._selectedVideoUrl = selectedVideoUrl
         self._selectedType = selectedType
         self._isPresented = isPresented
@@ -126,23 +128,22 @@ public struct AssetPicker: UIViewControllerRepresentable {
                 self.parent.selectedType = "image"
                 
                 for asset in results {
-                   
                     
                     if asset.itemProvider.canLoadObject(ofClass: UIImage.self) {
                         
                         asset.itemProvider.loadObject(ofClass: UIImage.self, completionHandler: { (object, error) in
+                            
                             if let err = error {
                                 self.parent.errorMessage = err.localizedDescription
                             }
                             else if let image = object as? UIImage {
-                                
                                 self.parent.selectedImage = image
+                                if let assetId = asset.assetIdentifier {
+                                    assetIdList.append(assetId)
+                                }
+                                self.parent.selectedAsset = PHAsset.fetchAssets(withLocalIdentifiers: assetIdList, options: nil).firstObject
                             }
                         })
-                        
-                        if let assetId = asset.assetIdentifier {
-                            assetIdList.append(assetId)
-                        }
                         
                     }
                     else {
