@@ -16,7 +16,6 @@ public struct AssetPicker: UIViewControllerRepresentable {
     
     @Binding var pickerResult: [String]
     @Binding var selectedImage:UIImage?
-    @Binding var selectedAsset:[String:String]?
     @Binding var selectedVideoUrl:URL?
     @Binding var selectedType:String
     @Binding var isPresented: Bool
@@ -28,11 +27,10 @@ public struct AssetPicker: UIViewControllerRepresentable {
     
 
     
-    public init(pickerResult:Binding<[String]>, selectedImage:Binding<UIImage?>, selectedAsset:Binding<[String:String]?>, selectedVideoUrl:Binding<URL?>,
+    public init(pickerResult:Binding<[String]>, selectedImage:Binding<UIImage?>, selectedVideoUrl:Binding<URL?>,
                 selectedType:Binding<String>, isPresented:Binding<Bool>, errorMessage:Binding<String?>, preferredType:String, isMultipleSelection:Bool) {
         self._pickerResult = pickerResult
         self._selectedImage = selectedImage
-        self._selectedAsset = selectedAsset
         self._selectedVideoUrl = selectedVideoUrl
         self._selectedType = selectedType
         self._isPresented = isPresented
