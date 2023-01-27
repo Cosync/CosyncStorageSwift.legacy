@@ -151,7 +151,7 @@ public struct AssetPicker: UIViewControllerRepresentable {
                                 }
                                 
                                 if let phAsset = PHAsset.fetchAssets(withLocalIdentifiers: assetIdList, options: nil).firstObject,
-                                   let assetType = asset.value(forKey: "UniformTypeIdentifiers") as? String {
+                                   let assetType = asset.itemProvider.value(forKey: "UniformTypeIdentifiers") as? String {
                                     
                                     let assetModel:[String:String] = ["assetIdentifier":asset.assetIdentifier!, "localIdentifier":phAsset.localIdentifier
                                                                   , "pixelWidth" : "\(phAsset.pixelWidth)", "pixelHeight": "\(phAsset.pixelHeight)",
