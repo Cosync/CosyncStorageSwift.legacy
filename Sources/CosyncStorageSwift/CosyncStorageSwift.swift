@@ -756,7 +756,7 @@ public class CosyncStorageSwift:NSObject, ObservableObject,  URLSessionTaskDeleg
                 let resources = PHAssetResource.assetResources(for: phAsset)
                 if let file = resources.first {
                     let fileSize = file.value(forKey: "fileSize") as? Int
-                    let fileName = file.originalFilename
+                    let fileName = file.originalFilename.trimmingCharacters(in: .whitespacesAndNewlines) 
                     let options = PHContentEditingInputRequestOptions()
                     options.isNetworkAccessAllowed = true
                     
