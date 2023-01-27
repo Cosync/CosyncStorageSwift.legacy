@@ -142,6 +142,7 @@ public struct AssetPicker: UIViewControllerRepresentable {
                                     assetIdList.append(assetId)
                                 }
                                 self.parent.selectedAsset = PHAsset.fetchAssets(withLocalIdentifiers: assetIdList, options: nil).firstObject
+                                self.parent.pickerResult = assetIdList
                             }
                         })
                         
