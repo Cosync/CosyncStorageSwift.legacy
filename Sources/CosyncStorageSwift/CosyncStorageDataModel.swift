@@ -97,3 +97,13 @@ public struct AssetModel: Codable {
     public var updatedAt: Date?
 }
 
+
+public struct SelectedAssetModel: Codable {
+    public var assetIdentifier: String
+    public var localIdentifier: String
+    public var pixelWidth: Int
+    public var pixelHeight: Int
+    public var mediaType:String
+    public var assetType:String
+}
+

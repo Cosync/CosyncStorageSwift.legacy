@@ -8,6 +8,7 @@
 import Foundation
 import PhotosUI
 import SwiftUI
+import CosyncStorageSwift
 
 @available(iOS 15, *)
 public struct AssetPicker: UIViewControllerRepresentable {
@@ -22,7 +23,7 @@ public struct AssetPicker: UIViewControllerRepresentable {
     var preferredType:String = "all"
     var isMultipleSelection:Bool = false
      
-    public init(pickerResult:Binding<[String]>, selectedImage:Binding<UIImage?>, selectedAsset:Binding<PHAsset?>, selectedVideoUrl:Binding<URL?>,
+    public init(pickerResult:Binding<[String]>, selectedImage:Binding<UIImage?>, selectedAsset:Binding<SelectedAssetModel?>, selectedVideoUrl:Binding<URL?>,
                 selectedType:Binding<String>, isPresented:Binding<Bool>, errorMessage:Binding<String?>, preferredType:String, isMultipleSelection:Bool) {
         self._pickerResult = pickerResult
         self._selectedImage = selectedImage
@@ -137,11 +138,18 @@ public struct AssetPicker: UIViewControllerRepresentable {
                                 self.parent.errorMessage = err.localizedDescription
                             }
                             else if let image = object as? UIImage {
+                                
                                 self.parent.selectedImage = image
+                                
                                 if let assetId = asset.assetIdentifier {
                                     assetIdList.append(assetId)
                                 }
-                                self.parent.selectedAsset = PHAsset.fetchAssets(withLocalIdentifiers: assetIdList, options: nil).firstObject
+                                
+                                let phAsset = PHAsset.fetchAssets(withLocalIdentifiers: assetIdList, options: nil).firstObject
+                                let assetType = phAsset?.value(forKey: "UniformTypeIdentifiers") as? String
+                                
+                                self.parent.selectedAsset = SelectedAssetModel(assetIdentifier: asset.assetIdentifier, localIdentifier: phAsset?.localIdentifier, pixelWidth: phAsset?.pixelWidth, pixelHeight: phAsset?.pixelHeight, mediaType: phAsset?.mediaType, assetType: assetType)
+                                
                                 self.parent.pickerResult = assetIdList
                             }
                         })
