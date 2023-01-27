@@ -228,7 +228,7 @@ public class CosyncStorageSwift:NSObject, ObservableObject,  URLSessionTaskDeleg
                         
                         if let fileName = resources.first?.originalFilename {
                             let imageManager = PHImageManager.default()
-                            
+                            let  trimmedFileName = fileName.trimmingCharacters(in: .whitespacesAndNewlines)
                             let options = PHImageRequestOptions()
                             options.resizeMode = PHImageRequestOptionsResizeMode.exact
                             options.isSynchronous = true;
@@ -236,7 +236,7 @@ public class CosyncStorageSwift:NSObject, ObservableObject,  URLSessionTaskDeleg
                             imageManager.requestImage(for: phAsset, targetSize: CGSize(width: phAsset.pixelWidth, height: phAsset.pixelHeight), contentMode: .aspectFit, options: options, resultHandler: { image, _ in
                                 
                                 if  let image = image {
-                                    self.uploadImage(assetUpload: assetUpload, image: image, fileName:fileName, contentType:contentType)
+                                    self.uploadImage(assetUpload: assetUpload, image: image, fileName:trimmedFileName, contentType:contentType)
                                 }
                             })
                         }
@@ -247,8 +247,6 @@ public class CosyncStorageSwift:NSObject, ObservableObject,  URLSessionTaskDeleg
                         Task{
                             do {
                                 try await self.uploadFileToURL(assetUpload:assetUpload ,filename: assetLocalIdentifier, writeUrl: assetUpload.writeUrl!, contentType: contentType)
-                                
-                               
                                 
                             }
                             catch{
