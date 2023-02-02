@@ -673,6 +673,8 @@ public class CosyncStorageSwift:NSObject, ObservableObject,  URLSessionTaskDeleg
                 let contentType = url.mimeType()
                 print("CosyncStorageSwift createFileAssetUpload contentType : \(contentType)")
                 
+                let fileName = url.lastPathComponent.filter({$0 != " "})
+                
                 let cosyncAssetUpload = CosyncAssetUpload()
                 cosyncAssetUpload.expirationHours = expiredHours
                 cosyncAssetUpload._id = ObjectId.generate()
@@ -680,7 +682,7 @@ public class CosyncStorageSwift:NSObject, ObservableObject,  URLSessionTaskDeleg
                 cosyncAssetUpload.sessionId = self.sessionId!
                 cosyncAssetUpload.extra = url.lastPathComponent
                 cosyncAssetUpload.noCuts = noCut
-                cosyncAssetUpload.filePath = path + "/" + url.lastPathComponent
+                cosyncAssetUpload.filePath = path + "/" + fileName
                 cosyncAssetUpload.contentType = contentType
                 cosyncAssetUpload.size = Int(fileSize)
                 cosyncAssetUpload.createdAt = Date()
