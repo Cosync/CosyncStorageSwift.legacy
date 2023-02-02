@@ -228,7 +228,7 @@ public class CosyncStorageSwift:NSObject, ObservableObject,  URLSessionTaskDeleg
                         
                         if let fileName = resources.first?.originalFilename {
                             let imageManager = PHImageManager.default()
-                            let  trimmedFileName = fileName.trimmingCharacters(in: .whitespacesAndNewlines)
+                            let  trimmedFileName = fileName.filter({$0 != " "})
                             let options = PHImageRequestOptions()
                             options.resizeMode = PHImageRequestOptionsResizeMode.exact
                             options.isSynchronous = true;
@@ -754,7 +754,7 @@ public class CosyncStorageSwift:NSObject, ObservableObject,  URLSessionTaskDeleg
                 let resources = PHAssetResource.assetResources(for: phAsset)
                 if let file = resources.first {
                     let fileSize = file.value(forKey: "fileSize") as? Int
-                    let fileName = file.originalFilename.trimmingCharacters(in: .whitespacesAndNewlines) 
+                    let fileName = file.originalFilename.filter({$0 != " "})
                     let options = PHContentEditingInputRequestOptions()
                     options.isNetworkAccessAllowed = true
                     
