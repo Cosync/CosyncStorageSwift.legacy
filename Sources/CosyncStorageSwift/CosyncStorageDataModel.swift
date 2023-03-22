@@ -13,6 +13,7 @@ public class CosyncAssetUpload: Object {
     
     @Persisted(primaryKey: true) public var _id: ObjectId
     @Persisted(indexed: true) public var userId: String = ""
+    @Persisted(indexed: true) public var transactionId: String = ""
     @Persisted public var sessionId: String
     @Persisted public var extra: String = ""
     @Persisted public var filePath: String = ""
@@ -52,6 +53,7 @@ public class CosyncAsset: Object {
     @Persisted(primaryKey: true) public var _id: ObjectId
     @Persisted(indexed: true) public var userId: String = ""
     @Persisted(indexed: true) public var sessionId: String
+    @Persisted(indexed: true) public var transactionId: String = ""
     @Persisted public var path: String = ""
     @Persisted public var expirationHours: Double = 24.0
     @Persisted public var contentType: String?

@@ -744,7 +744,7 @@ public class CosyncStorageSwift:NSObject, ObservableObject,  URLSessionTaskDeleg
     }
     
     
-    public func createAssetUpload(assetIdList: [String], expiredHours:Double, path:String, noCuts:Bool = false, originalSize:Int = 0, smallCutSize:Int = 0, mediumCutSize:Int = 0, largeCutSize:Int = 0) -> [ObjectId]{
+    public func createAssetUpload(assetIdList: [String], expiredHours:Double, path:String, noCuts:Bool = false, originalSize:Int = 0, smallCutSize:Int = 0, mediumCutSize:Int = 0, largeCutSize:Int = 0, transactionId:String = "") -> [ObjectId]{
         var objectIdList:[ObjectId] = []
         if let currentUserId = self.currentUserId,
            let sessionId = self.sessionId {
@@ -787,6 +787,7 @@ public class CosyncStorageSwift:NSObject, ObservableObject,  URLSessionTaskDeleg
                             cosyncAssetUpload._id = ObjectId.generate()
                             cosyncAssetUpload.userId = currentUserId
                             cosyncAssetUpload.sessionId = sessionId
+                            cosyncAssetUpload.transactionId = transactionId
                             cosyncAssetUpload.extra = phAsset.localIdentifier
                             cosyncAssetUpload.filePath = path + "/" + fileName
                             cosyncAssetUpload.contentType = contentType
